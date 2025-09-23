@@ -54,6 +54,9 @@ body { margin:0; color:white; min-height:100vh; display:flex; align-items:center
 .form-label { color: rgba(255,255,255,0.9); }
 .form-control { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; }
 .form-control:focus { background: rgba(255,255,255,0.12); color: #fff; border-color: #6e8efb; box-shadow: 0 0 0 0.2rem rgba(110,142,251,0.25); }
+.hint { font-size: 12px; color: rgba(255,255,255,0.75); }
+.strength { height: 8px; background: rgba(255,255,255,0.15); border-radius: 6px; overflow:hidden; }
+.strength-bar { height:100%; width:0%; background: linear-gradient(90deg, #ff4d4d, #ffc107, #28a745); transition: width .2s ease; }
 .btn-primary-glow { background: linear-gradient(135deg, #6e8efb, #a777e3); border:none; width:100%; padding: 10px 16px; border-radius: 10px; box-shadow: 0 8px 30px rgba(110,142,251,0.35); }
 .alt { color: rgba(255,255,255,0.8); }
 .alt a { color: #cfd8ff; text-decoration: none; }
@@ -70,7 +73,7 @@ body { margin:0; color:white; min-height:100vh; display:flex; align-items:center
     <h2 class="title">Create your account</h2>
     <p class="subtitle">Join SkillForge and start building your coding superpowers.</p>
     <?php if($message) echo "<div class='alert alert-danger'>$message</div>"; ?>
-    <form method="POST" action="">
+    <form method="POST" action="" id="registerForm" novalidate>
         <div class="mb-3">
             <label class="form-label">Username</label>
             <input type="text" name="username" class="form-control" required>
@@ -81,7 +84,13 @@ body { margin:0; color:white; min-height:100vh; display:flex; align-items:center
         </div>
         <div class="mb-3">
             <label class="form-label">Password</label>
-            <input type="password" name="password" class="form-control" required>
+            <input type="password" name="password" id="password" class="form-control" required minlength="8">
+            <div class="hint mt-1">Min 8 chars, include uppercase, lowercase, number, and symbol.</div>
+            <div class="strength mt-2"><div class="strength-bar" id="pwBar"></div></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" id="confirmPassword" class="form-control" required>
         </div>
         <button type="submit" class="btn btn-primary-glow">Create account</button>
         <p class="mt-3 text-center alt">Already have an account? <a href="login.php">Login</a></p>
@@ -90,3 +99,37 @@ body { margin:0; color:white; min-height:100vh; display:flex; align-items:center
 
 </body>
 </html>
+<script>
+(function(){
+  function evaluateStrength(pw){
+    var score = 0;
+    if (!pw) return 0;
+    if (pw.length >= 8) score += 1;
+    if (/[A-Z]/.test(pw)) score += 1;
+    if (/[a-z]/.test(pw)) score += 1;
+    if (/[0-9]/.test(pw)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pw)) score += 1;
+    return Math.min(score, 5);
+  }
+  var pw = document.getElementById('password');
+  var bar = document.getElementById('pwBar');
+  var form = document.getElementById('registerForm');
+  var confirm = document.getElementById('confirmPassword');
+  function update(){
+    var s = evaluateStrength(pw.value);
+    var widths = ['0%','20%','40%','60%','80%','100%'];
+    bar.style.width = widths[s];
+  }
+  pw && pw.addEventListener('input', update);
+  update();
+  form && form.addEventListener('submit', function(e){
+    var p = pw.value;
+    var ok = p.length >= 8 && /[A-Z]/.test(p) && /[a-z]/.test(p) && /[0-9]/.test(p) && /[^A-Za-z0-9]/.test(p);
+    var match = (confirm.value === p);
+    if (!ok || !match){
+      e.preventDefault();
+      alert(!ok ? 'Password is not strong enough.' : 'Passwords do not match.');
+    }
+  });
+})();
+</script>
