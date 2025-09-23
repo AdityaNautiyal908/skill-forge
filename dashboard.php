@@ -29,13 +29,58 @@ foreach ($languages as $lang) {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard</title>
+<title>SkillForge — Dashboard</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+body {
+    margin: 0;
+    color: white;
+    min-height: 100vh;
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(167,119,227,0.25), transparent 60%),
+                radial-gradient(1000px 600px at 90% 30%, rgba(110,142,251,0.25), transparent 60%),
+                linear-gradient(135deg, #0f1020, #111437 60%, #0a0d2a);
+    overflow-x: hidden;
+}
+.stars { position: fixed; inset: 0; background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.8), transparent 60%), radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.6), transparent 60%), radial-gradient(1px 1px at 65% 25%, rgba(255,255,255,0.7), transparent 60%), radial-gradient(1px 1px at 80% 55%, rgba(255,255,255,0.5), transparent 60%); opacity: .5; pointer-events: none; }
+.orb { position:absolute; border-radius:50%; filter: blur(20px); opacity:.5; animation: float 12s ease-in-out infinite; }
+.o1{ width: 200px; height: 200px; background:#6e8efb; top:-60px; left:-60px; }
+.o2{ width: 260px; height: 260px; background:#a777e3; bottom:-80px; right:10%; animation-delay:2s; }
+@keyframes float { 0%,100%{ transform:translateY(0)} 50%{ transform:translateY(-14px)} }
+
+.navbar {
+    background: rgba(0,0,0,0.35) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.navbar-brand { font-weight: 700; }
+
+.section {
+    position: relative;
+    z-index: 1;
+}
+.card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.08);
+    color: white;
+}
+.card-title { font-weight: 700; }
+.card-text { color: rgba(255,255,255,0.8); }
+.btn-primary {
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    border: none;
+    box-shadow: 0 8px 30px rgba(110,142,251,0.35);
+}
+.heading { font-weight: 800; }
+</style>
 </head>
-<body class="bg-light">
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<body>
+<div class="stars"></div>
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
-        <a class="navbar-brand" href="#">CodeLearn</a>
+        <a class="navbar-brand" href="#">SkillForge</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
@@ -49,15 +94,15 @@ foreach ($languages as $lang) {
     </div>
 </nav>
 
-<div class="container mt-5">
-    <h2 class="mb-4">Choose a Language to Practice</h2>
+<div class="container mt-5 section">
+    <h2 class="mb-4 heading">Choose a Language to Practice</h2>
     <div class="row">
         <?php foreach ($languages as $lang): ?>
             <div class="col-md-4 mb-3">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm h-100">
                     <div class="card-body">
-                        <h5 class="card-title text-capitalize"><?= $lang ?></h5>
-                        <p class="card-text"><?= $problems_count[$lang] ?> problems available</p>
+                        <h5 class="card-title text-capitalize mb-1"><?= $lang ?></h5>
+                        <p class="card-text mb-3"><?= $problems_count[$lang] ?> problems available</p>
                         <a href="problems.php?language=<?= $lang ?>" class="btn btn-primary">Start Practicing</a>
                     </div>
                 </div>
