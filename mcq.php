@@ -70,9 +70,11 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
 body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200px 600px at 10% 10%, rgba(167,119,227,0.25), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(110,142,251,0.25), transparent 60%), linear-gradient(135deg, #0f1020, #111437 60%, #0a0d2a); }
+.light { color:#111 !important; background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.05), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.04), transparent 60%), linear-gradient(135deg, #f7f8fc, #f0f3ff 60%, #e9ecff) !important; }
 .panel { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:18px; }
 .btn-primary { background: linear-gradient(135deg, #6e8efb, #a777e3); border:none; box-shadow: 0 8px 30px rgba(110,142,251,0.35); }
 .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: white; }
+.no-anim .stars, .no-anim .orb, .no-anim canvas { display:none !important; }
 .filter-pill { margin-right: 6px; margin-bottom: 6px; }
 </style>
 </head>
@@ -155,4 +157,17 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
 
 </body>
 </html>
+<script>
+(function(){
+  function apply(){ var theme=localStorage.getItem('sf_theme')||'dark'; var anim=localStorage.getItem('sf_anim')||'on'; document.body.classList.toggle('light', theme==='light'); document.body.classList.toggle('no-anim', anim==='off'); }
+  apply();
+  var box=document.createElement('div'); box.style.position='fixed'; box.style.right='14px'; box.style.bottom='14px'; box.style.zIndex='9999'; box.style.display='flex'; box.style.gap='8px';
+  function mk(label){ var b=document.createElement('button'); b.textContent=label; b.style.border='1px solid rgba(255,255,255,0.4)'; b.style.background='rgba(0,0,0,0.35)'; b.style.color='#fff'; b.style.padding='8px 12px'; b.style.borderRadius='10px'; b.style.backdropFilter='blur(6px)'; return b; }
+  var tBtn=mk((localStorage.getItem('sf_theme')||'dark')==='light'?'Dark Mode':'Light Mode');
+  var aBtn=mk((localStorage.getItem('sf_anim')||'on')==='off'?'Enable Anim':'Disable Anim');
+  tBtn.onclick=function(){ var cur=localStorage.getItem('sf_theme')||'dark'; var next=cur==='dark'?'light':'dark'; localStorage.setItem('sf_theme',next); tBtn.textContent=next==='light'?'Dark Mode':'Light Mode'; apply(); };
+  aBtn.onclick=function(){ var cur=localStorage.getItem('sf_anim')||'on'; var next=cur==='on'?'off':'on'; localStorage.setItem('sf_anim',next); aBtn.textContent=next==='off'?'Enable Anim':'Disable Anim'; apply(); };
+  document.body.appendChild(box); box.appendChild(tBtn); box.appendChild(aBtn);
+})();
+</script>
 
