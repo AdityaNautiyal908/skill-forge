@@ -111,6 +111,7 @@ body {
                 <p class="desc mb-0"><?= htmlspecialchars($problem->description) ?></p>
             </div>
             <div class="text-end">
+                <a href="dashboard.php" id="exitBtn" class="btn btn-outline btn-sm mb-2">Exit</a>
                 <div class="small">Problem <?= $index + 1 ?> of <?= count($allProblems) ?></div>
                 <div class="progress" style="width:260px;">
                     <div class="progress-bar" role="progressbar" style="width: <?= round((($index + 1) / max(1, count($allProblems))) * 100) ?>%"></div>
@@ -140,11 +141,11 @@ body {
     <!-- Navigation -->
     <div class="mt-4 d-flex justify-content-between">
         <?php if ($index > 0): ?>
-        <a href="problems.php?language=<?= $language ?>&index=<?= $index-1 ?>" class="btn btn-outline">&laquo; Previous</a>
+        <a href="problems.php?language=<?= $language ?>&index=<?= $index-1 ?>" class="btn btn-outline nav-problem">&laquo; Previous</a>
         <?php else: ?><div></div><?php endif; ?>
 
         <?php if ($index < count($allProblems)-1): ?>
-        <a href="problems.php?language=<?= $language ?>&index=<?= $index+1 ?>" class="btn btn-primary">Next &raquo;</a>
+        <a href="problems.php?language=<?= $language ?>&index=<?= $index+1 ?>" class="btn btn-primary nav-problem">Next &raquo;</a>
         <?php endif; ?>
     </div>
 </div>
@@ -158,6 +159,35 @@ editor.setOptions({ fontSize:"14pt", showPrintMargin:false });
 var form = document.querySelector("form");
 form.addEventListener("submit", function() {
     document.querySelector("textarea[name='code']").value = editor.getValue();
+    // prevent leave warning on intentional submit
+    dirty = false;
+});
+
+// Warn on exit if code changed and not submitted yet
+var initialCode = editor.getValue();
+var dirty = false;
+editor.session.on('change', function(){
+    dirty = editor.getValue() !== initialCode;
+});
+
+function guardExit(e){
+    if (dirty) {
+        if (!confirm('You have unsaved code. Are you sure you want to leave?')) {
+            e.preventDefault();
+            return false;
+        }
+    }
+}
+
+var exitBtn = document.getElementById('exitBtn');
+if (exitBtn) exitBtn.addEventListener('click', guardExit);
+document.querySelectorAll('.nav-problem').forEach(function(a){ a.addEventListener('click', guardExit); });
+
+window.addEventListener('beforeunload', function (e) {
+    if (dirty) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
 });
 </script>
 

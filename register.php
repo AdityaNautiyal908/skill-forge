@@ -8,7 +8,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
-    $password_hash = password_hash($password, PASSWORD_BCRYPT);
+
+    // Server-side password strength validation
+    $hasUpper = preg_match('/[A-Z]/', $password);
+    $hasLower = preg_match('/[a-z]/', $password);
+    $hasDigit = preg_match('/[0-9]/', $password);
+    $hasSymbol = preg_match('/[^A-Za-z0-9]/', $password);
+    if (strlen($password) < 8 || !$hasUpper || !$hasLower || !$hasDigit || !$hasSymbol) {
+        $message = "Password must be at least 8 chars and include uppercase, lowercase, number, and symbol.";
+    }
+
+    if ($message === "") {
+        $password_hash = password_hash($password, PASSWORD_BCRYPT);
 
     // Check if email or username already exists
     $stmt = $conn->prepare("SELECT * FROM users WHERE email=? OR username=?");
@@ -16,19 +27,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->execute();
     $result = $stmt->get_result();
 
-    if ($result->num_rows > 0) {
-        $message = "Username or Email already exists!";
-    } else {
-        // Insert user
-        $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $username, $email, $password_hash);
-        if ($stmt->execute()) {
-            $_SESSION['user_id'] = $stmt->insert_id;
-            $_SESSION['username'] = $username;
-            header("Location: dashboard.php");
-            exit;
+        if ($result->num_rows > 0) {
+            $message = "Username or Email already exists!";
         } else {
-            $message = "Registration failed. Try again!";
+            // Insert user
+            $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $username, $email, $password_hash);
+            if ($stmt->execute()) {
+                $_SESSION['user_id'] = $stmt->insert_id;
+                $_SESSION['username'] = $username;
+                header("Location: dashboard.php");
+                exit;
+            } else {
+                $message = "Registration failed. Try again!";
+            }
         }
     }
 }
@@ -101,6 +113,28 @@ body { margin:0; color:white; min-height:100vh; display:flex; align-items:center
 </html>
 <script>
 (function(){
+  // Simple toast system
+  var toastBox = document.createElement('div');
+  toastBox.style.position = 'fixed';
+  toastBox.style.bottom = '16px';
+  toastBox.style.right = '16px';
+  toastBox.style.zIndex = '9999';
+  document.body.appendChild(toastBox);
+  function showToast(msg, variant){
+    var t = document.createElement('div');
+    t.textContent = msg;
+    t.style.marginTop = '8px';
+    t.style.padding = '10px 14px';
+    t.style.borderRadius = '10px';
+    t.style.background = variant === 'error' ? 'rgba(220,53,69,0.9)' : 'rgba(255,193,7,0.9)';
+    t.style.color = '#000';
+    t.style.boxShadow = '0 6px 20px rgba(0,0,0,0.35)';
+    toastBox.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 3000);
+  }
+  window._sf_toast = showToast;
+})();
+(function(){
   function evaluateStrength(pw){
     var score = 0;
     if (!pw) return 0;
@@ -128,7 +162,9 @@ body { margin:0; color:white; min-height:100vh; display:flex; align-items:center
     var match = (confirm.value === p);
     if (!ok || !match){
       e.preventDefault();
-      alert(!ok ? 'Password is not strong enough.' : 'Passwords do not match.');
+      if (window._sf_toast) {
+        window._sf_toast(!ok ? 'Password is not strong enough.' : 'Passwords do not match.', 'error');
+      }
     }
   });
 })();

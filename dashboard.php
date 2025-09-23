@@ -47,6 +47,15 @@ foreach ($languages as $lang) {
     $count = count($coll['manager']->executeQuery($coll['db'] . ".problems", $query)->toArray());
     $problems_count[$lang] = $count;
 }
+
+// MCQ count (distinct category optional later). If collection exists, count all docs
+$mcqCount = 0;
+try {
+    $mcqQuery = new MongoDB\Driver\Query([]);
+    $mcqCount = count($coll['manager']->executeQuery($coll['db'] . ".mcq", $mcqQuery)->toArray());
+} catch (Throwable $e) {
+    $mcqCount = 0;
+}
 ?>
 
 <!DOCTYPE html>
@@ -137,6 +146,19 @@ body {
                 </div>
             </div>
         <?php endforeach; ?>
+
+        <!-- MCQ Practice Card -->
+        <?php if ($mcqCount > 0): ?>
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-1">MCQ Practice</h5>
+                        <p class="card-text mb-3"><?= $mcqCount ?> questions available</p>
+                        <a href="mcq.php?index=0" class="btn btn-primary">Start MCQs</a>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 </body>
