@@ -1,9 +1,22 @@
 <?php
-// Connect to MongoDB without Composer
-$manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+// Ensure MongoDB PHP extension is available
+if (!extension_loaded('mongodb')) {
+    die('MongoDB PHP extension not enabled. Enable php_mongodb in php.ini and restart Apache.');
+}
+
+// Create a new Manager instance (no Composer required)
+try {
+    $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+} catch (Throwable $e) {
+    die('Failed to connect to MongoDB: ' . $e->getMessage());
+}
 
 function getCollection($db, $collection) {
-    $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+    try {
+        $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+    } catch (Throwable $e) {
+        die('Failed to connect to MongoDB: ' . $e->getMessage());
+    }
     return [
         'manager' => $manager,
         'db' => $db,
