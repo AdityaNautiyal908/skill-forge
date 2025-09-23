@@ -1,8 +1,8 @@
 <?php
 session_start();
 
-// Redirect logged-in users to dashboard
-if (isset($_SESSION['user_id'])) {
+// Redirect logged-in users to dashboard unless explicitly viewing public landing
+if (isset($_SESSION['user_id']) && !isset($_GET['public'])) {
     header("Location: dashboard.php");
     exit;
 }
@@ -78,6 +78,9 @@ body {
     margin-bottom: 18px;
     font-weight: 600;
     letter-spacing: 0.6px;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
 }
 .title {
     font-size: clamp(32px, 6vw, 60px);
@@ -144,7 +147,7 @@ body {
 <div class="orb o3"></div>
 
 <section class="hero container">
-    <span class="logo">SkillForge</span>
+    <a href="index.php" class="logo">SkillForge</a>
     <h1 class="title">Level up your coding skills with interactive challenges</h1>
     <p class="subtitle">Practice HTML, CSS, JavaScript and more with real problems, instant feedback, and a delightful editor. Learn by doing and build confidence one challenge at a time.</p>
     <div class="cta-wrap">

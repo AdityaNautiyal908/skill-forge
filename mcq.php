@@ -8,10 +8,17 @@ if (!isset($_SESSION['user_id'])) {
 require_once "config/db_mongo.php";
 
 $index = isset($_GET['index']) ? (int)$_GET['index'] : 0;
+$category = isset($_GET['category']) ? trim($_GET['category']) : '';
+$difficulty = isset($_GET['difficulty']) ? trim($_GET['difficulty']) : '';
 $coll = getCollection('coding_platform', 'mcq');
 
-// Fetch all MCQs (you can later filter by category)
-$query = new MongoDB\Driver\Query([], ['sort' => ['order' => 1, '_id' => 1]]);
+// Build filter for MCQs
+$filter = [];
+if ($category !== '') $filter['category'] = $category;
+if ($difficulty !== '') $filter['difficulty'] = $difficulty;
+
+// Fetch all MCQs per filter
+$query = new MongoDB\Driver\Query($filter, ['sort' => ['order' => 1, '_id' => 1]]);
 $all = $coll['manager']->executeQuery($coll['db'] . ".mcq", $query)->toArray();
 if (count($all) === 0) die('No MCQ questions found.');
 
@@ -43,10 +50,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Move next automatically if there is one
     $next = $index + 1;
     if ($next < count($all)) {
-        header('Location: mcq.php?index=' . $next . '&msg=' . urlencode($feedback));
+        $qs = http_build_query(['index'=>$next,'msg'=>$feedback,'category'=>$category,'difficulty'=>$difficulty]);
+        header('Location: mcq.php?' . $qs);
         exit;
     } else {
-        header('Location: mcq.php?index=' . $index . '&msg=' . urlencode($feedback . ' — End of MCQs'));
+        $qs = http_build_query(['index'=>$index,'msg'=>$feedback . ' — End of MCQs','category'=>$category,'difficulty'=>$difficulty]);
+        header('Location: mcq.php?' . $qs);
         exit;
     }
 }
@@ -64,6 +73,7 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
 .panel { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:18px; }
 .btn-primary { background: linear-gradient(135deg, #6e8efb, #a777e3); border:none; box-shadow: 0 8px 30px rgba(110,142,251,0.35); }
 .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: white; }
+.filter-pill { margin-right: 6px; margin-bottom: 6px; }
 </style>
 </head>
 <body>
@@ -73,7 +83,46 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
       <h4 class="mb-1">MCQ Practice</h4>
       <div class="small">Question <?= $index + 1 ?> of <?= count($all) ?></div>
     </div>
-    <a href="dashboard.php" class="btn btn-outline btn-sm">Exit</a>
+    <div class="d-flex align-items-center gap-2">
+      <a href="dashboard.php" class="btn btn-outline btn-sm">SkillForge</a>
+      <a href="dashboard.php" class="btn btn-outline btn-sm">Exit</a>
+    </div>
+  </div>
+
+  <?php
+    // Distinct filters for dropdowns
+    $cmdCat = new MongoDB\Driver\Command(['distinct'=>'mcq','key'=>'category']);
+    $cmdDiff = new MongoDB\Driver\Command(['distinct'=>'mcq','key'=>'difficulty']);
+    try { $catRes = $coll['manager']->executeCommand($coll['db'], $cmdCat)->toArray()[0]->values ?? []; } catch (Throwable $e) { $catRes = []; }
+    try { $diffRes = $coll['manager']->executeCommand($coll['db'], $cmdDiff)->toArray()[0]->values ?? []; } catch (Throwable $e) { $diffRes = []; }
+  ?>
+
+  <div class="panel mb-3">
+    <form class="row g-2" method="GET" action="">
+      <input type="hidden" name="index" value="0" />
+      <div class="col-md-4">
+        <select class="form-select" name="category">
+          <option value="">All Categories</option>
+          <?php foreach ($catRes as $c): $sel = ($category === (string)$c) ? 'selected' : ''; ?>
+            <option <?= $sel ?> value="<?= htmlspecialchars((string)$c) ?>"><?= htmlspecialchars((string)$c) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <select class="form-select" name="difficulty">
+          <option value="">All Difficulties</option>
+          <?php foreach ($diffRes as $d): $sel = ($difficulty === (string)$d) ? 'selected' : ''; ?>
+            <option <?= $sel ?> value="<?= htmlspecialchars((string)$d) ?>"><?= htmlspecialchars((string)$d) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Apply</button>
+      </div>
+      <div class="col-md-2">
+        <a class="btn btn-outline w-100" href="mcq.php?index=0">Reset</a>
+      </div>
+    </form>
   </div>
 
   <?php if ($msg): ?>
@@ -82,7 +131,7 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
 
   <div class="panel">
     <h5 class="mb-3"><?= htmlspecialchars($q->question ?? '') ?></h5>
-    <form method="POST" action="mcq.php?index=<?= $index ?>">
+    <form method="POST" action="mcq.php?index=<?= $index ?>&category=<?= urlencode($category) ?>&difficulty=<?= urlencode($difficulty) ?>">
       <?php $opts = $q->options ?? []; $i = 0; foreach ($opts as $opt): $i++; $id = 'opt'.$i; ?>
         <div class="form-check mb-2">
           <input class="form-check-input" type="radio" name="choice" id="<?= $id ?>" value="<?= htmlspecialchars((string)$opt) ?>" required>
@@ -94,11 +143,11 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
 
     <div class="d-flex justify-content-between mt-4">
       <?php if ($index > 0): ?>
-      <a class="btn btn-outline" href="mcq.php?index=<?= $index - 1 ?>">&laquo; Previous</a>
+      <a class="btn btn-outline" href="mcq.php?index=<?= $index - 1 ?>&category=<?= urlencode($category) ?>&difficulty=<?= urlencode($difficulty) ?>">&laquo; Previous</a>
       <?php else: ?><div></div><?php endif; ?>
 
       <?php if ($index < count($all) - 1): ?>
-      <a class="btn btn-primary" href="mcq.php?index=<?= $index + 1 ?>">Next &raquo;</a>
+      <a class="btn btn-primary" href="mcq.php?index=<?= $index + 1 ?>&category=<?= urlencode($category) ?>&difficulty=<?= urlencode($difficulty) ?>">Next &raquo;</a>
       <?php endif; ?>
     </div>
   </div>

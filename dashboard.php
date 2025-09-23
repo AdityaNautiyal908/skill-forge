@@ -113,7 +113,7 @@ body {
 
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
-        <a class="navbar-brand" href="#">SkillForge</a>
+        <a class="navbar-brand" href="dashboard.php">SkillForge</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
