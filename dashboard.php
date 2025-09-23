@@ -14,7 +14,31 @@ $command = new MongoDB\Driver\Command([
     'distinct' => 'problems',
     'key' => 'language'
 ]);
+// Fetch languages present in DB
 $languages = $coll['manager']->executeCommand($coll['db'], $command)->toArray()[0]->values ?? [];
+
+// Also include supported languages explicitly so new tracks appear when added
+$supportedLanguages = ['c', 'cpp', 'java', 'javascript', 'html', 'css', 'python'];
+$languages = array_merge($languages, $supportedLanguages);
+
+// Normalize, unique, and sort for consistent display
+$languages = array_values(array_unique(array_filter(array_map(function($l){
+    return is_string($l) ? strtolower(trim($l)) : $l;
+}, $languages), function($l){ return !empty($l); })));
+sort($languages, SORT_STRING | SORT_FLAG_CASE);
+
+// Friendly display names
+$languageLabels = [
+    'c' => 'C',
+    'cpp' => 'C++',
+    'c++' => 'C++',
+    'java' => 'Java',
+    'javascript' => 'JavaScript',
+    'js' => 'JavaScript',
+    'html' => 'HTML',
+    'css' => 'CSS',
+    'python' => 'Python',
+];
 
 // Count problems per language
 $problems_count = [];
@@ -101,7 +125,7 @@ body {
             <div class="col-md-4 mb-3">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
-                        <h5 class="card-title text-capitalize mb-1"><?= $lang ?></h5>
+                        <h5 class="card-title mb-1"><?= $languageLabels[strtolower($lang)] ?? ucfirst($lang) ?></h5>
                         <p class="card-text mb-3"><?= $problems_count[$lang] ?> problems available</p>
                         <a href="problems.php?language=<?= $lang ?>" class="btn btn-primary">Start Practicing</a>
                     </div>
