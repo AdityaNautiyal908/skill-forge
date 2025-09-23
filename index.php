@@ -15,6 +15,7 @@ if (isset($_SESSION['user_id'])) {
 <title>CodeLearn - Learn & Practice Programming</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
+html, body { height: 100%; }
 body {
     margin: 0;
     color: white;
@@ -24,6 +25,7 @@ body {
     justify-content: center;
     flex-direction: column;
     overflow-x: hidden;
+    overflow-y: hidden; /* lock vertical scroll for single-screen hero */
     background: radial-gradient(1200px 600px at 10% 10%, rgba(167,119,227,0.25), transparent 60%),
                 radial-gradient(1000px 600px at 90% 30%, rgba(110,142,251,0.25), transparent 60%),
                 linear-gradient(135deg, #0f1020, #111437 60%, #0a0d2a);
@@ -65,6 +67,7 @@ body {
     padding: 60px 28px;
     width: 100%;
     max-width: 1100px;
+    min-height: 100vh; /* ensure hero fills viewport */
 }
 .logo {
     display: inline-block;
