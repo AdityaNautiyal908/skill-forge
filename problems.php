@@ -105,7 +105,12 @@ body {
 .panel { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px; }
 .title { font-weight: 800; }
 .desc { color: rgba(255,255,255,0.8); }
-.btn-primary, .btn-success { background: linear-gradient(135deg, #6e8efb, #a777e3); border: none; box-shadow: 0 8px 30px rgba(110,142,251,0.35); }
+.btn-primary, .btn-success { background: linear-gradient(135deg, #6e8efb, #a777e3); border: none; box-shadow: 0 8px 30px rgba(110,142,251,0.35); transition: transform .2s ease, box-shadow .2s ease, background .25s ease, filter .2s ease; }
+.btn-success:hover, .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 34px rgba(110,142,251,0.5); background: linear-gradient(135deg, #7f9bff, #b48af3); filter: brightness(1.05); }
+.btn-success:active, .btn-primary:active { transform: translateY(0); background: linear-gradient(135deg, #5c78ef, #905fdc); filter: brightness(.98); }
+.btn-animated { position: relative; overflow:hidden; }
+.btn-animated .ripple { position:absolute; border-radius:50%; transform: scale(0); animation: ripple .6s linear; background: rgba(255,255,255,0.7); pointer-events:none; }
+@keyframes ripple { to { transform: scale(10); opacity: 0; } }
 .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: white; }
 #editor { height: 420px; width: 100%; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; background:#1e1f1e; }
 .progress { height: 10px; background: rgba(255,255,255,0.12); }
@@ -153,7 +158,7 @@ body {
         <div id="editor"><?= htmlspecialchars($problem->starter_code ?? '') ?></div>
         <textarea name="code" style="display:none;"></textarea>
 
-        <button type="submit" class="btn btn-success mt-3">Submit Code</button>
+        <button type="submit" class="btn btn-success btn-animated mt-3">Submit Code</button>
     </form>
 
     <!-- Navigation -->
@@ -227,6 +232,21 @@ window.addEventListener('beforeunload', function (e) {
   aBtn.onclick=function(){ var cur=localStorage.getItem('sf_anim')||'on'; var next=cur==='on'?'off':'on'; localStorage.setItem('sf_anim',next); aBtn.textContent=next==='off'?'Enable Anim':'Disable Anim'; apply(); };
   document.body.appendChild(box); box.appendChild(tBtn); box.appendChild(aBtn);
 })();
+
+// Button ripple for submit
+(document.querySelectorAll('.btn-animated')||[]).forEach(function(btn){
+  btn.addEventListener('click', function(e){
+    var rect = this.getBoundingClientRect();
+    var ripple = document.createElement('span');
+    var size = Math.max(rect.width, rect.height);
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+    this.appendChild(ripple);
+    setTimeout(function(){ ripple.remove(); }, 600);
+  });
+});
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

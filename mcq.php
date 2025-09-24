@@ -79,7 +79,12 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
     color: #4a5568 !important;
 }
 .panel { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:18px; }
-.btn-primary { background: linear-gradient(135deg, #6e8efb, #a777e3); border:none; box-shadow: 0 8px 30px rgba(110,142,251,0.35); }
+.btn-primary { background: linear-gradient(135deg, #6e8efb, #a777e3); border:none; box-shadow: 0 8px 30px rgba(110,142,251,0.35); transition: transform .2s ease, box-shadow .2s ease, background .25s ease, filter .2s ease; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 34px rgba(110,142,251,0.5); background: linear-gradient(135deg, #7f9bff, #b48af3); filter: brightness(1.05); }
+.btn-primary:active { transform: translateY(0); background: linear-gradient(135deg, #5c78ef, #905fdc); filter: brightness(.98); }
+.btn-animated { position: relative; overflow:hidden; }
+.btn-animated .ripple { position:absolute; border-radius:50%; transform: scale(0); animation: ripple .6s linear; background: rgba(255,255,255,0.7); pointer-events:none; }
+@keyframes ripple { to { transform: scale(10); opacity: 0; } }
 .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: white; }
 .no-anim .stars, .no-anim .orb, .no-anim canvas { display:none !important; }
 .filter-pill { margin-right: 6px; margin-bottom: 6px; }
@@ -130,7 +135,7 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
         <button class="btn btn-primary w-100" type="submit">Apply</button>
       </div>
       <div class="col-md-2">
-        <a class="btn btn-outline w-100" href="mcq.php?index=0">Reset</a>
+      <a class="btn btn-outline w-100" href="mcq.php?index=0">Reset</a>
       </div>
     </form>
   </div>
@@ -148,7 +153,7 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
           <label class="form-check-label" for="<?= $id ?>"><?= htmlspecialchars((string)$opt) ?></label>
         </div>
       <?php endforeach; ?>
-      <button type="submit" class="btn btn-primary mt-2">Submit Answer</button>
+      <button type="submit" class="btn btn-primary btn-animated mt-2">Submit Answer</button>
     </form>
 
     <div class="d-flex justify-content-between mt-4">
@@ -170,12 +175,27 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
   function apply(){ var theme=localStorage.getItem('sf_theme')||'dark'; var anim=localStorage.getItem('sf_anim')||'on'; document.body.classList.toggle('light', theme==='light'); document.body.classList.toggle('no-anim', anim==='off'); }
   apply();
   var box=document.createElement('div'); box.style.position='fixed'; box.style.right='14px'; box.style.bottom='14px'; box.style.zIndex='9999'; box.style.display='flex'; box.style.gap='8px';
-  function mk(label){ var b=document.createElement('button'); b.textContent=label; b.style.border='1px solid rgba(255,255,255,0.4)'; b.style.background='rgba(0,0,0,0.35)'; b.style.color='#fff'; b.style.padding='8px 12px'; b.style.borderRadius='10px'; b.style.backdropFilter='blur(6px)'; return b; }
+  function mk(label){ var b=document.createElement('button'); b.textContent=label; b.style.border='1px solid rgba(255,255,255,0.4)'; b.style.background='rgba(0,0,0,0.35)'; b.style.color='#fff'; b.style.padding='8px 12px'; b.style.borderRadius='10px'; b.style.backdropFilter='blur(6px)'; b.className='btn-animated'; return b; }
   var tBtn=mk((localStorage.getItem('sf_theme')||'dark')==='light'?'Dark Mode':'Light Mode');
   var aBtn=mk((localStorage.getItem('sf_anim')||'on')==='off'?'Enable Anim':'Disable Anim');
   tBtn.onclick=function(){ var cur=localStorage.getItem('sf_theme')||'dark'; var next=cur==='dark'?'light':'dark'; localStorage.setItem('sf_theme',next); tBtn.textContent=next==='light'?'Dark Mode':'Light Mode'; apply(); };
   aBtn.onclick=function(){ var cur=localStorage.getItem('sf_anim')||'on'; var next=cur==='on'?'off':'on'; localStorage.setItem('sf_anim',next); aBtn.textContent=next==='off'?'Enable Anim':'Disable Anim'; apply(); };
   document.body.appendChild(box); box.appendChild(tBtn); box.appendChild(aBtn);
 })();
+
+// Button ripple
+(document.querySelectorAll('.btn-animated')||[]).forEach(function(btn){
+  btn.addEventListener('click', function(e){
+    var rect = this.getBoundingClientRect();
+    var ripple = document.createElement('span');
+    var size = Math.max(rect.width, rect.height);
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+    this.appendChild(ripple);
+    setTimeout(function(){ ripple.remove(); }, 600);
+  });
+});
 </script>
 

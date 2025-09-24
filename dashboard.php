@@ -121,6 +121,28 @@ body {
     border: none;
     box-shadow: 0 8px 30px rgba(110,142,251,0.35);
 }
+.btn-animated { position: relative; overflow: hidden; border: none; transition: transform .15s ease, box-shadow .2s ease, filter .2s ease, background .25s ease; cursor: pointer; }
+.btn-primary.btn-animated { background: linear-gradient(135deg, #6e8efb, #a777e3); }
+.btn-primary.btn-animated:hover { background: linear-gradient(135deg, #7f9bff, #b48af3); filter: brightness(1.06); box-shadow: 0 12px 38px rgba(110,142,251,0.5); }
+.btn-primary.btn-animated:active { background: linear-gradient(135deg, #5c78ef, #905fdc); filter: brightness(.98); box-shadow: 0 6px 18px rgba(110,142,251,0.35); }
+.btn-animated .ripple { position:absolute; border-radius:50%; transform: scale(0); animation: ripple .6s linear; background: rgba(255,255,255,0.7); pointer-events:none; }
+@keyframes ripple { to { transform: scale(10); opacity: 0; } }
+
+/* Feature card animation to match landing cards */
+.feature { position: relative; overflow: hidden; transform-style: preserve-3d; transition: transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease; }
+.feature::before { content:""; position:absolute; inset:-2px; border-radius: 16px; padding:2px; background: conic-gradient(from 0deg, var(--c1), var(--c2), var(--c3), var(--c1)); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: spin 8s linear infinite; pointer-events:none; }
+.feature::after { content:""; position:absolute; inset:-30% -20% auto -20%; height:120%; background: radial-gradient(closest-side, var(--glow) 0%, transparent 60%); filter: blur(16px); opacity:.35; animation: pulse 4.5s ease-in-out infinite; pointer-events:none; }
+.feature:hover { transform: translateY(-3px) rotateX(2deg); box-shadow: 0 20px 46px rgba(0,0,0,.35); }
+.feature.f1 { --c1:#6e8efb; --c2:#a777e3; --c3:#36d1dc; --glow: rgba(110,142,251,.45); }
+.feature.f2 { --c1:#ff7eb3; --c2:#ff758c; --c3:#ffd86f; --glow: rgba(255,126,179,.45); }
+.feature.f3 { --c1:#5efc8d; --c2:#3ecf8e; --c3:#9be15d; --glow: rgba(62,207,142,.45); }
+.feature.f4 { --c1:#ffd54f; --c2:#ffa726; --c3:#ff6f61; --glow: rgba(255,165,0,.45); }
+.feature.f1:hover { background: linear-gradient(180deg, rgba(110,142,251,0.18), rgba(110,142,251,0.06)); border-color: rgba(110,142,251,0.35); }
+.feature.f2:hover { background: linear-gradient(180deg, rgba(255,126,179,0.18), rgba(255,126,179,0.06)); border-color: rgba(255,126,179,0.35); }
+.feature.f3:hover { background: linear-gradient(180deg, rgba(62,207,142,0.18), rgba(62,207,142,0.06)); border-color: rgba(62,207,142,0.35); }
+.feature.f4:hover { background: linear-gradient(180deg, rgba(255,165,0,0.18), rgba(255,165,0,0.06)); border-color: rgba(255,165,0,0.35); }
+@keyframes spin { to { transform: rotate(360deg);} }
+@keyframes pulse { 0%,100%{ opacity:.28; transform: translateY(0);} 50%{ opacity:.5; transform: translateY(-6px);} }
 .heading { font-weight: 800; }
 @media (max-width: 576px){
   .progress { width: 160px !important; }
@@ -163,26 +185,26 @@ body {
 <div class="container mt-5 section">
     <h2 class="mb-4 heading">Choose a Language to Practice</h2>
     <div class="row">
-        <?php foreach ($languages as $lang): ?>
+        <?php foreach ($languages as $lang): $pal=['f1','f2','f3','f4']; static $x=0; $cls=$pal[$x%4]; $x++; ?>
             <div class="col-md-4 mb-3">
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm h-100 feature <?= $cls ?>">
                     <div class="card-body">
                         <h5 class="card-title mb-1"><?= $languageLabels[strtolower($lang)] ?? ucfirst($lang) ?></h5>
                         <p class="card-text mb-3"><?= $problems_count[$lang] ?> problems available</p>
-                        <a href="problems.php?language=<?= $lang ?>" class="btn btn-primary">Start Practicing</a>
+                        <a href="problems.php?language=<?= $lang ?>" class="btn btn-primary btn-animated">Start Practicing</a>
                     </div>
                 </div>
             </div>
         <?php endforeach; ?>
 
         <!-- MCQ Practice Card -->
-        <?php if ($mcqCount > 0): ?>
+        <?php if ($mcqCount > 0): $cls=$pal[$x%4]; ?>
             <div class="col-md-4 mb-3">
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm h-100 feature <?= $cls ?>">
                     <div class="card-body">
                         <h5 class="card-title mb-1">MCQ Practice</h5>
                         <p class="card-text mb-3"><?= $mcqCount ?> questions available</p>
-                        <a href="mcq.php?index=0" class="btn btn-primary">Start MCQs</a>
+                        <a href="mcq.php?index=0" class="btn btn-primary btn-animated">Start MCQs</a>
                     </div>
                 </div>
             </div>
@@ -197,6 +219,21 @@ body {
   function resize(){ canvas.width=innerWidth*DPR; canvas.height=innerHeight*DPR; } window.addEventListener('resize', resize); resize();
   var nodes=[], NUM=50, K=4; for(var i=0;i<NUM;i++){ nodes.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*0.15*DPR,vy:(Math.random()-0.5)*0.15*DPR,p:Math.random()*1e3}); }
   function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(var i=0;i<nodes.length;i++){ var a=nodes[i]; ctx.fillStyle='rgba(255,255,255,0.02)'; ctx.beginPath(); ctx.arc(a.x,a.y,2*DPR,0,Math.PI*2); ctx.fill(); var near=[]; for(var j=0;j<nodes.length;j++) if(j!==i){var b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy; near.push({j:j,d:d});} near.sort(function(p,q){return p.d-q.d;}); for(var k=0;k<K;k++){ var idx=near[k]&&near[k].j; if(idx==null) continue; var b=nodes[idx],dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy),alpha=Math.max(0,1-dist/(180*DPR)); if(alpha<=0) continue; ctx.strokeStyle='rgba(160,190,255,'+(0.12*alpha)+')'; ctx.lineWidth=1*DPR; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); var t=(Date.now()+a.p)%1200/1200; var px=a.x+(b.x-a.x)*t, py=a.y+(b.y-a.y)*t; var grad=ctx.createRadialGradient(px,py,0,px,py,10*DPR); grad.addColorStop(0,'rgba(120,220,255,'+(0.35*alpha)+')'); grad.addColorStop(1,'rgba(120,220,255,0)'); ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(px,py,10*DPR,0,Math.PI*2); ctx.fill(); }} for(var i=0;i<nodes.length;i++){ var n=nodes[i]; n.x+=n.vx; n.y+=n.vy; if(n.x<0||n.x>canvas.width) n.vx*=-1; if(n.y<0||n.y>canvas.height) n.vy*=-1;} requestAnimationFrame(loop);} loop();})();
+
+// Button ripple
+(document.querySelectorAll('.btn-animated')||[]).forEach(function(btn){
+  btn.addEventListener('click', function(e){
+    var rect = this.getBoundingClientRect();
+    var ripple = document.createElement('span');
+    var size = Math.max(rect.width, rect.height);
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+    this.appendChild(ripple);
+    setTimeout(function(){ ripple.remove(); }, 600);
+  });
+});
 
 // Toggles
 (function(){

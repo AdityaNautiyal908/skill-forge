@@ -184,9 +184,13 @@ body.light .toggle-btn { border-color: rgba(0,0,0,0.3); background:rgba(255,255,
     padding: 12px 22px;
     border-radius: 12px;
     box-shadow: 0 8px 30px rgba(110,142,251,0.35);
-    transition: transform .2s ease, box-shadow .2s ease;
+    transition: transform .2s ease, box-shadow .2s ease, background .25s ease, filter .2s ease;
 }
-.btn-primary-glow:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(110,142,251,0.5); }
+.btn-primary-glow:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(110,142,251,0.5); background: linear-gradient(135deg, #7f9bff, #b48af3); filter: brightness(1.05); }
+.btn-primary-glow:active { transform: translateY(0); background: linear-gradient(135deg, #5c78ef, #905fdc); filter: brightness(.98); }
+.btn-animated { position: relative; overflow:hidden; cursor:pointer; }
+.btn-animated .ripple { position:absolute; border-radius:50%; transform: scale(0); animation: ripple .6s linear; background: rgba(255,255,255,0.7); pointer-events:none; }
+@keyframes ripple { to { transform: scale(10); opacity: 0; } }
 
 .btn-ghost {
     background: transparent;
@@ -208,9 +212,55 @@ body.light .toggle-btn { border-color: rgba(0,0,0,0.3); background:rgba(255,255,
     border-radius: 14px;
     padding: 18px;
     text-align: left;
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transition: transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;
 }
 .feature h5 { margin-bottom: 8px; }
 .feature p { margin: 0; color: rgba(255,255,255,0.75); font-size: 14px; }
+
+/* Animated gradient border + glow using CSS variables per-card */
+.feature::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    padding: 2px;
+    background: conic-gradient(from 0deg, var(--c1), var(--c2), var(--c3), var(--c1));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; /* Safari */
+    mask-composite: exclude;     /* Others */
+    animation: spin 8s linear infinite;
+    pointer-events: none;
+}
+.feature::after {
+    content: "";
+    position: absolute;
+    inset: -30% -20% auto -20%;
+    height: 120%;
+    background: radial-gradient(closest-side, var(--glow) 0%, transparent 60%);
+    filter: blur(16px);
+    opacity: .35;
+    animation: pulse 4.5s ease-in-out infinite;
+    pointer-events: none;
+}
+.feature:hover { transform: translateY(-4px) rotateX(2deg); box-shadow: 0 20px 50px rgba(0,0,0,.38); }
+
+/* Hover background tint per palette */
+.feature.f1:hover { background: linear-gradient(180deg, rgba(110,142,251,0.18), rgba(110,142,251,0.06)); border-color: rgba(110,142,251,0.35); }
+.feature.f2:hover { background: linear-gradient(180deg, rgba(255,126,179,0.18), rgba(255,126,179,0.06)); border-color: rgba(255,126,179,0.35); }
+.feature.f3:hover { background: linear-gradient(180deg, rgba(62,207,142,0.18), rgba(62,207,142,0.06)); border-color: rgba(62,207,142,0.35); }
+.feature.f4:hover { background: linear-gradient(180deg, rgba(255,165,0,0.18), rgba(255,165,0,0.06)); border-color: rgba(255,165,0,0.35); }
+
+/* Card palettes */
+.feature.f1 { --c1:#6e8efb; --c2:#a777e3; --c3:#36d1dc; --glow: rgba(110,142,251,.45); }
+.feature.f2 { --c1:#ff7eb3; --c2:#ff758c; --c3:#ffd86f; --glow: rgba(255,126,179,.45); }
+.feature.f3 { --c1:#5efc8d; --c2:#3ecf8e; --c3:#9be15d; --glow: rgba(62,207,142,.45); }
+.feature.f4 { --c1:#ffd54f; --c2:#ffa726; --c3:#ff6f61; --glow: rgba(255,165,0,.45); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100%{ opacity:.28; transform: translateY(0);} 50%{ opacity:.5; transform: translateY(-6px);} }
 /* Splash screen */
 .splash {
     position: fixed;
@@ -271,24 +321,24 @@ body.light .toggle-btn { border-color: rgba(0,0,0,0.3); background:rgba(255,255,
     <h1 class="title">Level up your coding skills with interactive challenges</h1>
     <p class="subtitle">Practice HTML, CSS, JavaScript and more with real problems, instant feedback, and a delightful editor. Learn by doing and build confidence one challenge at a time.</p>
     <div class="cta-wrap">
-        <a href="login.php" class="btn btn-primary-glow">Start Solving</a>
+        <a href="login.php" class="btn btn-primary-glow btn-animated">Start Solving</a>
         <a href="register.php" class="btn btn-ghost">Create Account</a>
     </div>
 
     <div class="features mt-4">
-        <div class="feature">
+        <div class="feature f1">
             <h5>Live Code Editor</h5>
             <p>Write, run, and iterate with syntax highlighting and instant feedback.</p>
         </div>
-        <div class="feature">
+        <div class="feature f2">
             <h5>Curated Tracks</h5>
             <p>Follow language tracks and progress through bite-sized challenges.</p>
         </div>
-        <div class="feature">
+        <div class="feature f3">
             <h5>Progress Saving</h5>
             <p>Pick up where you left off. Your submissions are stored securely.</p>
         </div>
-        <div class="feature">
+        <div class="feature f4">
             <h5>Beautiful UI</h5>
             <p>Clean, modern interface with subtle motion and pleasing colors.</p>
         </div>
@@ -445,6 +495,21 @@ document.addEventListener('mousemove', function(e){
   aBtn.onclick = function(){ var cur = localStorage.getItem('sf_anim')||'on'; var next = cur==='on'?'off':'on'; localStorage.setItem('sf_anim', next); aBtn.textContent = next==='off'?'Enable Anim':'Disable Anim'; applyPrefs(); };
   box.appendChild(tBtn); box.appendChild(aBtn); document.body.appendChild(box);
 })();
+
+// Button ripple effect for landing
+document.querySelectorAll('.btn-animated').forEach(function(btn){
+  btn.addEventListener('click', function(e){
+    var rect = this.getBoundingClientRect();
+    var ripple = document.createElement('span');
+    var size = Math.max(rect.width, rect.height);
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+    this.appendChild(ripple);
+    setTimeout(function(){ ripple.remove(); }, 600);
+  });
+});
 
 // Splash logic: show only on first visit for ~1.8s
 (function(){
