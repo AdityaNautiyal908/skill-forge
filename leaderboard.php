@@ -20,11 +20,13 @@ if ($range === '90d') $since = $now - 90*24*60*60*1000;
 
 $coll = getCollection('coding_platform', 'submissions');
 
-// Build MongoDB aggregation pipeline: count correct MCQ per user, get last solved date
-$match = [ 'type' => 'mcq', 'correct' => true ];
+// Build aggregation: count all submissions (code and MCQ), regardless of correctness
+$match = [];
 if ($since !== null) {
     $match['submitted_at'] = ['$gte' => new MongoDB\BSON\UTCDateTime($since)];
 }
+// MongoDB aggregate expects an object; use empty object when no filters
+if (empty($match)) { $match = new stdClass(); }
 
 $pipeline = [
     [ '$match' => $match ],
@@ -128,7 +130,7 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
           <tr>
             <th style="width:100px">Rank</th>
             <th>User</th>
-            <th style="width:180px">Solved (Correct)</th>
+            <th style="width:180px">Solved</th>
             <th style="width:220px">Last Solved</th>
           </tr>
         </thead>

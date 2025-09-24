@@ -24,6 +24,7 @@ $bulk = new MongoDB\Driver\BulkWrite;
 
 // Prepare submission document
 $submission = [
+    'type' => 'code',
     'user_id' => $_SESSION['user_id'],
     'problem_id' => $problem_id,
     'language' => $language,

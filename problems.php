@@ -40,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $subColl = getCollection('coding_platform', 'submissions');
         $bulk = new MongoDB\Driver\BulkWrite;
         $bulk->insert([
+            'type' => 'code',
             'user_id' => $_SESSION['user_id'],
             'problem_id' => $problem->_id,
             'language' => $problem->language,
