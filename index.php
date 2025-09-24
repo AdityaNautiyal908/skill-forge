@@ -211,6 +211,39 @@ body.light .toggle-btn { border-color: rgba(0,0,0,0.3); background:rgba(255,255,
 }
 .feature h5 { margin-bottom: 8px; }
 .feature p { margin: 0; color: rgba(255,255,255,0.75); font-size: 14px; }
+/* Splash screen */
+.splash {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(167,119,227,0.35), transparent 60%),
+                radial-gradient(1000px 600px at 90% 30%, rgba(110,142,251,0.35), transparent 60%),
+                linear-gradient(135deg, #0f1020, #111437 60%, #0a0d2a);
+    z-index: 10000;
+}
+.splash .brand {
+    font-weight: 900;
+    font-size: clamp(34px, 8vw, 72px);
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #fff, #e6d6ff 30%, #b3c6ff 70%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 20px rgba(110,142,251,.45));
+    opacity: 0; transform: translateY(10px) scale(.96);
+    animation: splashSequence 2.8s ease forwards, glowPulse 3s ease-in-out infinite 1.8s;
+}
+@keyframes splashSequence {
+  0% { opacity:0; transform: translateY(10px) scale(.92); }
+  20% { opacity:1; transform: translateY(0) scale(1.06); }
+  45% { opacity:1; transform: translateY(0) scale(1.0); }
+  70% { opacity:1; transform: translateY(-12vh) scale(.98); }
+  100% { opacity:0; transform: translateY(-46vh) scale(.92); }
+}
+@keyframes glowPulse {
+  0%,100% { filter: drop-shadow(0 0 12px rgba(110,142,251,.25)); }
+  50% { filter: drop-shadow(0 0 26px rgba(167,119,227,.45)); }
+}
 </style>
 </head>
 <body>
@@ -219,6 +252,19 @@ body.light .toggle-btn { border-color: rgba(0,0,0,0.3); background:rgba(255,255,
 <div class="orb o1"></div>
 <div class="orb o2"></div>
 <div class="orb o3"></div>
+
+<!-- Splash overlay (first visit) -->
+<div id="splash" class="splash" style="display:none;">
+  <div class="brand">SkillForge</div>
+  
+  <!-- Optional: small delay dots -->
+  <div style="position:absolute; bottom: 16%; display:flex; gap:8px;">
+    <span style="width:8px;height:8px;border-radius:50%;background:#a777e3;opacity:.6;animation: dots 1.2s infinite"></span>
+    <span style="width:8px;height:8px;border-radius:50%;background:#6e8efb;opacity:.6;animation: dots 1.2s infinite .2s"></span>
+    <span style="width:8px;height:8px;border-radius:50%;background:#36d1dc;opacity:.6;animation: dots 1.2s infinite .4s"></span>
+  </div>
+</div>
+
 
 <section class="hero container">
     <a href="index.php" class="logo">SkillForge</a>
@@ -398,6 +444,21 @@ document.addEventListener('mousemove', function(e){
   tBtn.onclick = function(){ var cur = localStorage.getItem('sf_theme')||'dark'; var next = cur==='dark'?'light':'dark'; localStorage.setItem('sf_theme', next); tBtn.textContent = next==='light'?'Dark Mode':'Light Mode'; applyPrefs(); };
   aBtn.onclick = function(){ var cur = localStorage.getItem('sf_anim')||'on'; var next = cur==='on'?'off':'on'; localStorage.setItem('sf_anim', next); aBtn.textContent = next==='off'?'Enable Anim':'Disable Anim'; applyPrefs(); };
   box.appendChild(tBtn); box.appendChild(aBtn); document.body.appendChild(box);
+})();
+
+// Splash logic: show only on first visit for ~1.8s
+(function(){
+  var seen = sessionStorage.getItem('sf_seen_splash');
+  var splash = document.getElementById('splash');
+  if (!splash) return;
+  if (!seen) {
+    splash.style.display = 'flex';
+    // Let CSS sequence play, then fully remove overlay to show page
+    setTimeout(function(){
+      splash.style.display = 'none';
+      sessionStorage.setItem('sf_seen_splash','1');
+    }, 3000);
+  }
 })();
 </script>
 </body>
