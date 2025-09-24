@@ -84,6 +84,7 @@ body.light .subtitle, body.light p, body.light .desc, body.light .card-text {
 
 /* Disable animation helper */
 body.no-anim .orb, body.no-anim .stars, body.no-anim #web { display: none !important; }
+body.no-anim .title { animation: none !important; }
 
 /* Toggles */
 .controls { position: fixed; right: 14px; bottom: 14px; z-index: 9999; display: flex; gap: 8px; }
@@ -121,6 +122,43 @@ body.light .toggle-btn { border-color: rgba(0,0,0,0.3); background:rgba(255,255,
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    position: relative;
+    animation: electricPulse 3s ease-in-out infinite;
+}
+
+@keyframes electricPulse {
+    0%, 100% {
+        text-shadow: 
+            0 0 5px rgba(255, 255, 255, 0.3),
+            0 0 10px rgba(110, 142, 251, 0.4),
+            0 0 15px rgba(167, 119, 227, 0.3);
+        filter: brightness(1);
+    }
+    25% {
+        text-shadow: 
+            0 0 8px rgba(255, 255, 255, 0.6),
+            0 0 16px rgba(110, 142, 251, 0.8),
+            0 0 24px rgba(167, 119, 227, 0.6),
+            0 0 32px rgba(110, 142, 251, 0.4);
+        filter: brightness(1.2);
+    }
+    50% {
+        text-shadow: 
+            0 0 12px rgba(255, 255, 255, 0.8),
+            0 0 24px rgba(110, 142, 251, 1),
+            0 0 36px rgba(167, 119, 227, 0.8),
+            0 0 48px rgba(110, 142, 251, 0.6),
+            0 0 60px rgba(167, 119, 227, 0.4);
+        filter: brightness(1.4);
+    }
+    75% {
+        text-shadow: 
+            0 0 8px rgba(255, 255, 255, 0.6),
+            0 0 16px rgba(110, 142, 251, 0.8),
+            0 0 24px rgba(167, 119, 227, 0.6),
+            0 0 32px rgba(110, 142, 251, 0.4);
+        filter: brightness(1.2);
+    }
 }
 .subtitle {
     max-width: 820px;
@@ -306,6 +344,30 @@ document.addEventListener('mousemove', function(e){
     requestAnimationFrame(draw);
   }
   draw();
+})();
+
+// Electric title effect
+(function(){
+  var title = document.querySelector('.title');
+  if (!title) return;
+  
+  function createElectricEffect() {
+    var letters = title.textContent.split('');
+    title.innerHTML = letters.map(function(letter, index) {
+      return '<span style="animation-delay: ' + (index * 0.1) + 's;">' + letter + '</span>';
+    }).join('');
+  }
+  
+  createElectricEffect();
+  
+  // Add hover effect for extra electric surge
+  title.addEventListener('mouseenter', function() {
+    this.style.animation = 'electricPulse 0.5s ease-in-out infinite';
+  });
+  
+  title.addEventListener('mouseleave', function() {
+    this.style.animation = 'electricPulse 3s ease-in-out infinite';
+  });
 })();
 
 // Global toggles (theme + animations)
