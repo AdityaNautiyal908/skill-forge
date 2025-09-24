@@ -94,6 +94,7 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
     </div>
     <div class="d-flex align-items-center gap-2">
       <a href="dashboard.php" class="btn btn-outline btn-sm">SkillForge</a>
+      <a href="profile.php" class="btn btn-outline btn-sm">Profile</a>
       <a href="dashboard.php" class="btn btn-outline btn-sm">Exit</a>
     </div>
   </div>

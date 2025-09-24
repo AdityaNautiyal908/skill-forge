@@ -93,6 +93,9 @@ body {
 .orb { position:absolute; border-radius:50%; filter: blur(20px); opacity:.5; animation: float 12s ease-in-out infinite; }
 .o1{ width: 200px; height: 200px; background:#6e8efb; top:-60px; left:-60px; }
 .o2{ width: 260px; height: 260px; background:#a777e3; bottom:-80px; right:10%; animation-delay:2s; }
+/* Light yellow glow */
+.light .o1{ background:#ffd54f !important; }
+.light .o2{ background:#ffb300 !important; }
 @keyframes float { 0%,100%{ transform:translateY(0)} 50%{ transform:translateY(-14px)} }
 
 .navbar {
@@ -137,6 +140,9 @@ body {
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <span class="nav-link text-white">Hello, <?= $_SESSION['username'] ?><?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?> <span class="badge bg-warning text-dark">Admin</span><?php endif; ?></span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="profile.php">Profile</a>
                 </li>
                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                 <li class="nav-item">

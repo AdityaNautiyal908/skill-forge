@@ -57,6 +57,11 @@ body.light .subtitle, body.light p, body.light .desc, body.light .card-text {
 .orb.o2 { width: 280px; height: 280px; background: #a777e3; bottom: -80px; right: 10%; animation-delay: 2s; }
 .orb.o3 { width: 160px; height: 160px; background: #36d1dc; top: 30%; right: -60px; animation-delay: 4s; }
 
+/* Light theme orb colors: warm yellow glow */
+body.light .orb.o1 { background: #ffd54f; }
+body.light .orb.o2 { background: #ffb300; }
+body.light .orb.o3 { background: #ffe082; }
+
 @keyframes float {
     0%, 100% { transform: translateY(0) translateX(0); }
     50% { transform: translateY(-20px) translateX(10px); }
@@ -316,8 +321,10 @@ document.addEventListener('mousemove', function(e){
         var dist = Math.sqrt(dx*dx+dy*dy);
         var alpha = Math.max(0, 1 - dist/(180*DPR));
         if (alpha<=0) continue;
-        // base wire
-        ctx.strokeStyle = 'rgba(160,190,255,'+ (0.12*alpha) +')';
+        // base wire with theme-aware color
+        var isLight = document.body.classList.contains('light');
+        var wireColor = isLight ? 'rgba(255,203,0,'+(0.16*alpha)+')' : 'rgba(160,190,255,'+(0.12*alpha)+')';
+        ctx.strokeStyle = wireColor;
         ctx.lineWidth = 1*DPR;
         ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
 
@@ -326,8 +333,13 @@ document.addEventListener('mousemove', function(e){
         var px = a.x + (b.x-a.x)*t;
         var py = a.y + (b.y-a.y)*t;
         var grad = ctx.createRadialGradient(px,py,0,px,py,10*DPR);
-        grad.addColorStop(0,'rgba(120,220,255,'+(0.35*alpha)+')');
-        grad.addColorStop(1,'rgba(120,220,255,0)');
+        if (isLight) {
+          grad.addColorStop(0,'rgba(255,220,120,'+(0.45*alpha)+')');
+          grad.addColorStop(1,'rgba(255,220,120,0)');
+        } else {
+          grad.addColorStop(0,'rgba(120,220,255,'+(0.35*alpha)+')');
+          grad.addColorStop(1,'rgba(120,220,255,0)');
+        }
         ctx.fillStyle = grad;
         ctx.beginPath(); ctx.arc(px,py,10*DPR,0,Math.PI*2); ctx.fill();
       }

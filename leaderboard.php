@@ -99,6 +99,7 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
       <ul class="navbar-nav ms-auto">
         <li class="nav-item"><a class="nav-link" href="dashboard.php">Dashboard</a></li>
         <li class="nav-item"><a class="nav-link" href="mcq.php?index=0">MCQ</a></li>
+        <li class="nav-item"><a class="nav-link" href="profile.php">Profile</a></li>
         <li class="nav-item"><a class="nav-link active" href="leaderboard.php">Leaderboard</a></li>
         <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
       </ul>
