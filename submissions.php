@@ -19,6 +19,10 @@ $filter = [];
 if ($language !== '') $filter['language'] = $language;
 if ($user !== '') $filter['user_id'] = $user;
 
+// Add type filter for submissions
+$type = isset($_GET['type']) ? trim($_GET['type']) : '';
+if ($type !== '') $filter['type'] = $type;
+
 // Pagination (simple)
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $limit = 20;
@@ -86,6 +90,38 @@ if (!empty($problemIds)) {
     }
 }
 
+// Fetch MCQ question details for MCQ submissions
+$mcqQuestions = [];
+$mcqIds = array_unique(array_filter(array_map(function($doc) { 
+    return (isset($doc->type) && $doc->type === 'mcq' && isset($doc->mcq_id)) ? $doc->mcq_id : null; 
+}, $rows), function($id) { return $id !== null; }));
+
+if (!empty($mcqIds)) {
+    $mcqColl = getCollection('coding_platform', 'mcq');
+    $objectIds = [];
+    foreach ($mcqIds as $id) {
+        try {
+            if (!empty($id)) {
+                $objectIds[] = new MongoDB\BSON\ObjectId($id);
+            }
+        } catch (Exception $e) {
+            continue;
+        }
+    }
+    
+    if (!empty($objectIds)) {
+        $mcqQuery = new MongoDB\Driver\Query(['_id' => ['$in' => $objectIds]]);
+        $mcqs = $mcqColl['manager']->executeQuery($mcqColl['db'] . ".mcq", $mcqQuery)->toArray();
+        foreach ($mcqs as $mcq) {
+            $mcqQuestions[(string)$mcq->_id] = [
+                'question' => $mcq->question ?? 'Unknown Question',
+                'language' => $mcq->language ?? 'Unknown',
+                'difficulty' => $mcq->difficulty ?? 'Unknown'
+            ];
+        }
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -134,11 +170,18 @@ table td, table th { border-color: rgba(255,255,255,0.15) !important; }
 <div class="container my-4">
   <div class="panel p-3 mb-3">
     <form class="row g-2" method="GET" action="">
-      <div class="col-md-3">
-        <input type="text" name="language" value="<?= htmlspecialchars($language) ?>" class="form-control" placeholder="Filter by language (e.g., html, c, java)">
+      <div class="col-md-2">
+        <input type="text" name="language" value="<?= htmlspecialchars($language) ?>" class="form-control" placeholder="Filter by language">
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <input type="text" name="user" value="<?= htmlspecialchars($user) ?>" class="form-control" placeholder="Filter by username or user_id">
+      </div>
+      <div class="col-md-2">
+        <select name="type" class="form-select">
+          <option value="">All Types</option>
+          <option value="code" <?= $type === 'code' ? 'selected' : '' ?>>Code Submissions</option>
+          <option value="mcq" <?= $type === 'mcq' ? 'selected' : '' ?>>MCQ Submissions</option>
+        </select>
       </div>
       <div class="col-md-2">
         <button class="btn btn-primary w-100" type="submit">Apply</button>
@@ -156,9 +199,9 @@ table td, table th { border-color: rgba(255,255,255,0.15) !important; }
           <tr>
             <th scope="col">When</th>
             <th scope="col">User</th>
-            <th scope="col">Language</th>
-            <th scope="col">Problem</th>
-            <th scope="col">Code</th>
+            <th scope="col">Type</th>
+            <th scope="col">Content</th>
+            <th scope="col">Details</th>
             <th scope="col" style="width:80px">Actions</th>
           </tr>
         </thead>
@@ -177,12 +220,33 @@ table td, table th { border-color: rgba(255,255,255,0.15) !important; }
                 <div class="fw-bold"><?= htmlspecialchars($userNames[$doc->user_id] ?? 'Unknown User') ?></div>
                 <small class="text-muted">ID: <?= htmlspecialchars((string)($doc->user_id ?? '')) ?></small>
               </td>
-              <td><?= htmlspecialchars((string)($doc->language ?? '')) ?></td>
               <td>
-                <div class="fw-bold"><?= htmlspecialchars($problemTitles[(string)$doc->problem_id] ?? 'Unknown Problem') ?></div>
-                <small class="text-muted">ID: <?= htmlspecialchars(mb_strimwidth((string)($doc->problem_id ?? ''), 0, 20, '…', 'UTF-8')) ?></small>
+                <?php if (isset($doc->type) && $doc->type === 'mcq'): ?>
+                  <span class="badge bg-info">MCQ</span>
+                <?php else: ?>
+                  <span class="badge bg-primary">Code</span>
+                <?php endif; ?>
               </td>
-              <td><span class="code-snippet"><?= htmlspecialchars(mb_strimwidth((string)($doc->code ?? ''), 0, 300, '…', 'UTF-8')) ?></span></td>
+              <td>
+                <?php if (isset($doc->type) && $doc->type === 'mcq'): ?>
+                  <div class="fw-bold"><?= htmlspecialchars($mcqQuestions[(string)$doc->mcq_id]['question'] ?? 'Unknown Question') ?></div>
+                  <small class="text-muted">Language: <?= htmlspecialchars($mcqQuestions[(string)$doc->mcq_id]['language'] ?? 'Unknown') ?></small>
+                <?php else: ?>
+                  <span class="code-snippet"><?= htmlspecialchars(mb_strimwidth((string)($doc->code ?? ''), 0, 300, '…', 'UTF-8')) ?></span>
+                <?php endif; ?>
+              </td>
+              <td>
+                <?php if (isset($doc->type) && $doc->type === 'mcq'): ?>
+                  <div class="fw-bold">Answer: <?= htmlspecialchars((string)($doc->choice ?? '')) ?></div>
+                  <div class="fw-bold <?= isset($doc->correct) && $doc->correct ? 'text-success' : 'text-danger' ?>">
+                    <?= isset($doc->correct) && $doc->correct ? 'Correct' : 'Incorrect' ?>
+                  </div>
+                  <small class="text-muted">Difficulty: <?= htmlspecialchars($mcqQuestions[(string)$doc->mcq_id]['difficulty'] ?? 'Unknown') ?></small>
+                <?php else: ?>
+                  <div class="fw-bold"><?= htmlspecialchars($problemTitles[(string)$doc->problem_id] ?? 'Unknown Problem') ?></div>
+                  <small class="text-muted">Language: <?= htmlspecialchars((string)($doc->language ?? '')) ?></small>
+                <?php endif; ?>
+              </td>
               <td>
                 <?php $idAttr = 'm'.substr(md5((string)($doc->_id ?? uniqid())), 0, 8); ?>
                 <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#<?= $idAttr ?>">View</button>
@@ -193,21 +257,44 @@ table td, table th { border-color: rgba(255,255,255,0.15) !important; }
                 <div class="modal-content" style="background: #1b1e2b; color:#fff;">
                   <div class="modal-header">
                     <h5 class="modal-title">
-                      Submission by <?= htmlspecialchars($userNames[$doc->user_id] ?? 'Unknown User') ?> 
-                      — <?= htmlspecialchars((string)($doc->language ?? '')) ?>
+                      <?php if (isset($doc->type) && $doc->type === 'mcq'): ?>
+                        MCQ Submission by <?= htmlspecialchars($userNames[$doc->user_id] ?? 'Unknown User') ?>
+                      <?php else: ?>
+                        Code Submission by <?= htmlspecialchars($userNames[$doc->user_id] ?? 'Unknown User') ?> 
+                        — <?= htmlspecialchars((string)($doc->language ?? '')) ?>
+                      <?php endif; ?>
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
-                    <div class="mb-3">
-                      <h6>Problem:</h6>
-                      <p class="mb-2"><?= htmlspecialchars($problemTitles[(string)$doc->problem_id] ?? 'Unknown Problem') ?></p>
-                      <h6>Code:</h6>
-                    </div>
-                    <pre style="white-space: pre-wrap; word-wrap: break-word;" id="code-<?= $idAttr ?>"><?php echo htmlspecialchars((string)($doc->code ?? '')); ?></pre>
+                    <?php if (isset($doc->type) && $doc->type === 'mcq'): ?>
+                      <div class="mb-3">
+                        <h6>Question:</h6>
+                        <p class="mb-2"><?= htmlspecialchars($mcqQuestions[(string)$doc->mcq_id]['question'] ?? 'Unknown Question') ?></p>
+                        <h6>User's Answer:</h6>
+                        <p class="mb-2"><?= htmlspecialchars((string)($doc->choice ?? '')) ?></p>
+                        <h6>Result:</h6>
+                        <p class="mb-2 <?= isset($doc->correct) && $doc->correct ? 'text-success' : 'text-danger' ?>">
+                          <?= isset($doc->correct) && $doc->correct ? 'Correct ✓' : 'Incorrect ✗' ?>
+                        </p>
+                        <h6>Language:</h6>
+                        <p class="mb-2"><?= htmlspecialchars($mcqQuestions[(string)$doc->mcq_id]['language'] ?? 'Unknown') ?></p>
+                        <h6>Difficulty:</h6>
+                        <p class="mb-2"><?= htmlspecialchars($mcqQuestions[(string)$doc->mcq_id]['difficulty'] ?? 'Unknown') ?></p>
+                      </div>
+                    <?php else: ?>
+                      <div class="mb-3">
+                        <h6>Problem:</h6>
+                        <p class="mb-2"><?= htmlspecialchars($problemTitles[(string)$doc->problem_id] ?? 'Unknown Problem') ?></p>
+                        <h6>Code:</h6>
+                      </div>
+                      <pre style="white-space: pre-wrap; word-wrap: break-word;" id="code-<?= $idAttr ?>"><?php echo htmlspecialchars((string)($doc->code ?? '')); ?></pre>
+                    <?php endif; ?>
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-light btn-copy" data-target="code-<?= $idAttr ?>">Copy</button>
+                    <?php if (!isset($doc->type) || $doc->type !== 'mcq'): ?>
+                      <button type="button" class="btn btn-outline-light btn-copy" data-target="code-<?= $idAttr ?>">Copy</button>
+                    <?php endif; ?>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                   </div>
                 </div>

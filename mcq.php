@@ -14,7 +14,7 @@ $coll = getCollection('coding_platform', 'mcq');
 
 // Build filter for MCQs
 $filter = [];
-if ($category !== '') $filter['category'] = $category;
+if ($category !== '') $filter['language'] = $category;
 if ($difficulty !== '') $filter['difficulty'] = $difficulty;
 
 // Fetch all MCQs per filter
@@ -31,7 +31,8 @@ $q = $all[$index];
 $feedback = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $choice = $_POST['choice'] ?? '';
-    $isCorrect = isset($q->answer) && (string)$q->answer === (string)$choice;
+    $choiceIndex = (int)$choice; // Convert to integer for comparison
+    $isCorrect = isset($q->answer) && $q->answer === $choiceIndex;
     $feedback = $isCorrect ? 'Correct!' : 'Incorrect';
 
     // Save attempt
@@ -99,7 +100,7 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
 
   <?php
     // Distinct filters for dropdowns
-    $cmdCat = new MongoDB\Driver\Command(['distinct'=>'mcq','key'=>'category']);
+    $cmdCat = new MongoDB\Driver\Command(['distinct'=>'mcq','key'=>'language']);
     $cmdDiff = new MongoDB\Driver\Command(['distinct'=>'mcq','key'=>'difficulty']);
     try { $catRes = $coll['manager']->executeCommand($coll['db'], $cmdCat)->toArray()[0]->values ?? []; } catch (Throwable $e) { $catRes = []; }
     try { $diffRes = $coll['manager']->executeCommand($coll['db'], $cmdDiff)->toArray()[0]->values ?? []; } catch (Throwable $e) { $diffRes = []; }
@@ -110,7 +111,7 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
       <input type="hidden" name="index" value="0" />
       <div class="col-md-4">
         <select class="form-select" name="category">
-          <option value="">All Categories</option>
+          <option value="">All Languages</option>
           <?php foreach ($catRes as $c): $sel = ($category === (string)$c) ? 'selected' : ''; ?>
             <option <?= $sel ?> value="<?= htmlspecialchars((string)$c) ?>"><?= htmlspecialchars((string)$c) ?></option>
           <?php endforeach; ?>
@@ -142,7 +143,7 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
     <form method="POST" action="mcq.php?index=<?= $index ?>&category=<?= urlencode($category) ?>&difficulty=<?= urlencode($difficulty) ?>">
       <?php $opts = $q->options ?? []; $i = 0; foreach ($opts as $opt): $i++; $id = 'opt'.$i; ?>
         <div class="form-check mb-2">
-          <input class="form-check-input" type="radio" name="choice" id="<?= $id ?>" value="<?= htmlspecialchars((string)$opt) ?>" required>
+          <input class="form-check-input" type="radio" name="choice" id="<?= $id ?>" value="<?= $i-1 ?>" required>
           <label class="form-check-label" for="<?= $id ?>"><?= htmlspecialchars((string)$opt) ?></label>
         </div>
       <?php endforeach; ?>
