@@ -129,10 +129,10 @@ body {
 @keyframes ripple { to { transform: scale(10); opacity: 0; } }
 
 /* Feature card animation to match landing cards */
-.feature { position: relative; overflow: hidden; transform-style: preserve-3d; transition: transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease; }
+.feature { position: relative; overflow: hidden; transform-style: preserve-3d; transition: transform .1s ease, box-shadow .2s ease, background .25s ease, border-color .25s ease; will-change: transform; }
 .feature::before { content:""; position:absolute; inset:-2px; border-radius: 16px; padding:2px; background: conic-gradient(from 0deg, var(--c1), var(--c2), var(--c3), var(--c1)); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: spin 8s linear infinite; pointer-events:none; }
 .feature::after { content:""; position:absolute; inset:-30% -20% auto -20%; height:120%; background: radial-gradient(closest-side, var(--glow) 0%, transparent 60%); filter: blur(16px); opacity:.35; animation: pulse 4.5s ease-in-out infinite; pointer-events:none; }
-.feature:hover { transform: translateY(-3px) rotateX(2deg); box-shadow: 0 20px 46px rgba(0,0,0,.35); }
+.feature:hover { box-shadow: 0 20px 46px rgba(0,0,0,.35); }
 .feature.f1 { --c1:#6e8efb; --c2:#a777e3; --c3:#36d1dc; --glow: rgba(110,142,251,.45); }
 .feature.f2 { --c1:#ff7eb3; --c2:#ff758c; --c3:#ffd86f; --glow: rgba(255,126,179,.45); }
 .feature.f3 { --c1:#5efc8d; --c2:#3ecf8e; --c3:#9be15d; --glow: rgba(62,207,142,.45); }
@@ -251,5 +251,41 @@ body {
   tBtn.onclick=function(){ var cur=localStorage.getItem('sf_theme')||'dark'; var next=cur==='dark'?'light':'dark'; localStorage.setItem('sf_theme',next); tBtn.textContent=next==='light'?'Dark Mode':'Light Mode'; apply(); };
   aBtn.onclick=function(){ var cur=localStorage.getItem('sf_anim')||'on'; var next=cur==='on'?'off':'on'; localStorage.setItem('sf_anim',next); aBtn.textContent=next==='off'?'Enable Anim':'Disable Anim'; apply(); };
   box.appendChild(tBtn); box.appendChild(aBtn); document.body.appendChild(box);
+})();
+</script>
+<script>
+// Pointer-based 3D tilt for dashboard feature cards
+(function(){
+  var cards = document.querySelectorAll('.feature');
+  if (!cards || cards.length === 0) return;
+  var maxTilt = 10; // degrees
+
+  function setTransform(card, xRatio, yRatio){
+    // xRatio and yRatio are in [-0.5, 0.5]
+    var rotateX = (yRatio * -2) * maxTilt; // move up => tilt back
+    var rotateY = (xRatio * 2) * maxTilt;  // move right => tilt right
+    card.style.transform = 'perspective(800px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
+  }
+
+  function handleMove(e){
+    var card = e.currentTarget;
+    var rect = card.getBoundingClientRect();
+    var x = (e.clientX - rect.left) / Math.max(1, rect.width) - 0.5; // -0.5..0.5
+    var y = (e.clientY - rect.top) / Math.max(1, rect.height) - 0.5;  // -0.5..0.5
+    setTransform(card, x, y);
+  }
+
+  function reset(e){
+    var card = e.currentTarget;
+    card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg)';
+  }
+
+  cards.forEach(function(card){
+    card.addEventListener('mousemove', handleMove);
+    card.addEventListener('mouseleave', reset);
+    card.addEventListener('mouseenter', function(){
+      card.style.transition = 'transform .08s ease';
+    });
+  });
 })();
 </script>
