@@ -33,10 +33,16 @@ body {
 
 /* Light theme override */
 body.light {
-    color: #111;
-    background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.05), transparent 60%),
-                radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.04), transparent 60%),
-                linear-gradient(135deg, #f7f8fc, #f0f3ff 60%, #e9ecff);
+    color: #2d3748;
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%),
+                radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%),
+                linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0);
+}
+body.light .title, body.light h1, body.light h2, body.light h3, body.light h4, body.light h5, body.light h6 {
+    color: #1a202c !important;
+}
+body.light .subtitle, body.light p, body.light .desc, body.light .card-text {
+    color: #4a5568 !important;
 }
 
 /* Floating orbs */
@@ -82,7 +88,7 @@ body.no-anim .orb, body.no-anim .stars, body.no-anim #web { display: none !impor
 /* Toggles */
 .controls { position: fixed; right: 14px; bottom: 14px; z-index: 9999; display: flex; gap: 8px; }
 .toggle-btn { border: 1px solid rgba(255,255,255,0.4); background: rgba(0,0,0,0.35); color:#fff; padding:8px 12px; border-radius:10px; backdrop-filter: blur(6px); cursor:pointer; }
-body.light .toggle-btn { border-color: rgba(0,0,0,0.2); background:#fff; color:#333; }
+body.light .toggle-btn { border-color: rgba(0,0,0,0.3); background:rgba(255,255,255,0.9); color:#2d3748; }
 
 .hero {
     position: relative;

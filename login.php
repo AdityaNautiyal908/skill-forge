@@ -50,6 +50,13 @@ body {
                 linear-gradient(135deg, #0f1020, #111437 60%, #0a0d2a);
     overflow: hidden;
 }
+.light { color:#2d3748 !important; background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%), linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0) !important; }
+.light .title, .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
+    color: #1a202c !important;
+}
+.light .subtitle, .light p, .light .desc, .light .card-text {
+    color: #4a5568 !important;
+}
 .stars { position: fixed; inset: 0; background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.8), transparent 60%), radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.6), transparent 60%), radial-gradient(1px 1px at 65% 25%, rgba(255,255,255,0.7), transparent 60%), radial-gradient(1px 1px at 80% 55%, rgba(255,255,255,0.5), transparent 60%); opacity: .5; pointer-events: none; }
 .web { position: fixed; inset:0; z-index:0; pointer-events:none; }
 .orb { position: absolute; border-radius: 50%; filter: blur(20px); opacity: .5; animation: float 12s ease-in-out infinite; }

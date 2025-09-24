@@ -30,6 +30,62 @@ $query = new MongoDB\Driver\Query(
 );
 $rows = $coll['manager']->executeQuery($coll['db'] . ".submissions", $query)->toArray();
 
+// Fetch usernames and problem titles for better display
+$userNames = [];
+$problemTitles = [];
+
+// Get unique user IDs and problem IDs
+if (!empty($rows)) {
+    $userIds = array_unique(array_filter(array_map(function($doc) { return $doc->user_id ?? null; }, $rows), function($id) { return $id !== null; }));
+    $problemIds = array_unique(array_filter(array_map(function($doc) { return $doc->problem_id ?? null; }, $rows), function($id) { return $id !== null; }));
+} else {
+    $userIds = [];
+    $problemIds = [];
+}
+
+// Fetch usernames from MySQL
+if (!empty($userIds)) {
+    // Filter out null/empty user IDs
+    $userIds = array_filter($userIds, function($id) { return !empty($id) && is_numeric($id); });
+    
+    if (!empty($userIds)) {
+        $placeholders = str_repeat('?,', count($userIds) - 1) . '?';
+        $stmt = $conn->prepare("SELECT id, username FROM users WHERE id IN ($placeholders)");
+        $stmt->bind_param(str_repeat('i', count($userIds)), ...$userIds);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $userNames[$row['id']] = $row['username'];
+        }
+    }
+}
+
+// Fetch problem titles from MongoDB
+if (!empty($problemIds)) {
+    $problemColl = getCollection('coding_platform', 'problems');
+    
+    // Convert problem IDs to ObjectId array, filtering out invalid ones
+    $objectIds = [];
+    foreach ($problemIds as $id) {
+        try {
+            if (!empty($id)) {
+                $objectIds[] = new MongoDB\BSON\ObjectId($id);
+            }
+        } catch (Exception $e) {
+            // Skip invalid ObjectId
+            continue;
+        }
+    }
+    
+    if (!empty($objectIds)) {
+        $problemQuery = new MongoDB\Driver\Query(['_id' => ['$in' => $objectIds]]);
+        $problems = $problemColl['manager']->executeQuery($problemColl['db'] . ".problems", $problemQuery)->toArray();
+        foreach ($problems as $problem) {
+            $problemTitles[(string)$problem->_id] = $problem->title ?? 'Unknown Problem';
+        }
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -40,6 +96,13 @@ $rows = $coll['manager']->executeQuery($coll['db'] . ".submissions", $query)->to
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
 body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200px 600px at 10% 10%, rgba(167,119,227,0.25), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(110,142,251,0.25), transparent 60%), linear-gradient(135deg, #0f1020, #111437 60%, #0a0d2a); }
+.light { color:#2d3748 !important; background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%), linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0) !important; }
+.light .title, .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
+    color: #1a202c !important;
+}
+.light .subtitle, .light p, .light .desc, .light .card-text {
+    color: #4a5568 !important;
+}
 .navbar { background: rgba(0,0,0,0.35) !important; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.08); }
 .panel { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.08); border-radius:16px; }
 table { color: white; }
@@ -75,7 +138,7 @@ table td, table th { border-color: rgba(255,255,255,0.15) !important; }
         <input type="text" name="language" value="<?= htmlspecialchars($language) ?>" class="form-control" placeholder="Filter by language (e.g., html, c, java)">
       </div>
       <div class="col-md-3">
-        <input type="text" name="user" value="<?= htmlspecialchars($user) ?>" class="form-control" placeholder="Filter by user_id">
+        <input type="text" name="user" value="<?= htmlspecialchars($user) ?>" class="form-control" placeholder="Filter by username or user_id">
       </div>
       <div class="col-md-2">
         <button class="btn btn-primary w-100" type="submit">Apply</button>
@@ -94,7 +157,7 @@ table td, table th { border-color: rgba(255,255,255,0.15) !important; }
             <th scope="col">When</th>
             <th scope="col">User</th>
             <th scope="col">Language</th>
-            <th scope="col">Problem Id</th>
+            <th scope="col">Problem</th>
             <th scope="col">Code</th>
             <th scope="col" style="width:80px">Actions</th>
           </tr>
@@ -110,9 +173,15 @@ table td, table th { border-color: rgba(255,255,255,0.15) !important; }
                   echo htmlspecialchars($ts);
                 ?>
               </td>
-              <td><?= htmlspecialchars((string)($doc->user_id ?? '')) ?></td>
+              <td>
+                <div class="fw-bold"><?= htmlspecialchars($userNames[$doc->user_id] ?? 'Unknown User') ?></div>
+                <small class="text-muted">ID: <?= htmlspecialchars((string)($doc->user_id ?? '')) ?></small>
+              </td>
               <td><?= htmlspecialchars((string)($doc->language ?? '')) ?></td>
-              <td><?= htmlspecialchars((string)($doc->problem_id ?? '')) ?></td>
+              <td>
+                <div class="fw-bold"><?= htmlspecialchars($problemTitles[(string)$doc->problem_id] ?? 'Unknown Problem') ?></div>
+                <small class="text-muted">ID: <?= htmlspecialchars(mb_strimwidth((string)($doc->problem_id ?? ''), 0, 20, '…', 'UTF-8')) ?></small>
+              </td>
               <td><span class="code-snippet"><?= htmlspecialchars(mb_strimwidth((string)($doc->code ?? ''), 0, 300, '…', 'UTF-8')) ?></span></td>
               <td>
                 <?php $idAttr = 'm'.substr(md5((string)($doc->_id ?? uniqid())), 0, 8); ?>
@@ -123,10 +192,18 @@ table td, table th { border-color: rgba(255,255,255,0.15) !important; }
               <div class="modal-dialog modal-lg modal-dialog-scrollable">
                 <div class="modal-content" style="background: #1b1e2b; color:#fff;">
                   <div class="modal-header">
-                    <h5 class="modal-title">Submission — <?= htmlspecialchars((string)($doc->language ?? '')) ?></h5>
+                    <h5 class="modal-title">
+                      Submission by <?= htmlspecialchars($userNames[$doc->user_id] ?? 'Unknown User') ?> 
+                      — <?= htmlspecialchars((string)($doc->language ?? '')) ?>
+                    </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
+                    <div class="mb-3">
+                      <h6>Problem:</h6>
+                      <p class="mb-2"><?= htmlspecialchars($problemTitles[(string)$doc->problem_id] ?? 'Unknown Problem') ?></p>
+                      <h6>Code:</h6>
+                    </div>
                     <pre style="white-space: pre-wrap; word-wrap: break-word;" id="code-<?= $idAttr ?>"><?php echo htmlspecialchars((string)($doc->code ?? '')); ?></pre>
                   </div>
                   <div class="modal-footer">
