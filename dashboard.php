@@ -129,7 +129,10 @@ body {
 @keyframes ripple { to { transform: scale(10); opacity: 0; } }
 
 /* Feature card animation to match landing cards */
-.feature { position: relative; overflow: hidden; transform-style: preserve-3d; transition: transform .1s ease, box-shadow .2s ease, background .25s ease, border-color .25s ease; will-change: transform; }
+.feature { position: relative; overflow: hidden; transform-style: preserve-3d; transition: transform .1s ease, box-shadow .2s ease, background .25s ease, border-color .25s ease; will-change: transform; 
+    /* Spotlight gradient layer (set via JS), then base panel gradient */
+    background-image: var(--spotGradient, none), linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+}
 .feature::before { content:""; position:absolute; inset:-2px; border-radius: 16px; padding:2px; background: conic-gradient(from 0deg, var(--c1), var(--c2), var(--c3), var(--c1)); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: spin 8s linear infinite; pointer-events:none; }
 .feature::after { content:""; position:absolute; inset:-30% -20% auto -20%; height:120%; background: radial-gradient(closest-side, var(--glow) 0%, transparent 60%); filter: blur(16px); opacity:.35; animation: pulse 4.5s ease-in-out infinite; pointer-events:none; }
 .feature:hover { box-shadow: 0 20px 46px rgba(0,0,0,.35); }
@@ -137,10 +140,10 @@ body {
 .feature.f2 { --c1:#ff7eb3; --c2:#ff758c; --c3:#ffd86f; --glow: rgba(255,126,179,.45); }
 .feature.f3 { --c1:#5efc8d; --c2:#3ecf8e; --c3:#9be15d; --glow: rgba(62,207,142,.45); }
 .feature.f4 { --c1:#ffd54f; --c2:#ffa726; --c3:#ff6f61; --glow: rgba(255,165,0,.45); }
-.feature.f1:hover { background: linear-gradient(180deg, rgba(110,142,251,0.18), rgba(110,142,251,0.06)); border-color: rgba(110,142,251,0.35); }
-.feature.f2:hover { background: linear-gradient(180deg, rgba(255,126,179,0.18), rgba(255,126,179,0.06)); border-color: rgba(255,126,179,0.35); }
-.feature.f3:hover { background: linear-gradient(180deg, rgba(62,207,142,0.18), rgba(62,207,142,0.06)); border-color: rgba(62,207,142,0.35); }
-.feature.f4:hover { background: linear-gradient(180deg, rgba(255,165,0,0.18), rgba(255,165,0,0.06)); border-color: rgba(255,165,0,0.35); }
+.feature.f1:hover { border-color: rgba(110,142,251,0.35); }
+.feature.f2:hover { border-color: rgba(255,126,179,0.35); }
+.feature.f3:hover { border-color: rgba(62,207,142,0.35); }
+.feature.f4:hover { border-color: rgba(255,165,0,0.35); }
 @keyframes spin { to { transform: rotate(360deg);} }
 @keyframes pulse { 0%,100%{ opacity:.28; transform: translateY(0);} 50%{ opacity:.5; transform: translateY(-6px);} }
 .heading { font-weight: 800; }
@@ -273,11 +276,18 @@ body {
     var x = (e.clientX - rect.left) / Math.max(1, rect.width) - 0.5; // -0.5..0.5
     var y = (e.clientY - rect.top) / Math.max(1, rect.height) - 0.5;  // -0.5..0.5
     setTransform(card, x, y);
+    // Spotlight gradient following cursor
+    var px = (x + 0.5) * 100; // 0..100
+    var py = (y + 0.5) * 100; // 0..100
+    var glow = getComputedStyle(card).getPropertyValue('--glow') || 'rgba(110,142,251,.45)';
+    var spot = 'radial-gradient(300px 200px at ' + px + '% ' + py + '%, ' + glow + ', rgba(0,0,0,0) 70%)';
+    card.style.setProperty('--spotGradient', spot);
   }
 
   function reset(e){
     var card = e.currentTarget;
     card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg)';
+    card.style.removeProperty('--spotGradient');
   }
 
   cards.forEach(function(card){
