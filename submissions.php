@@ -161,6 +161,9 @@ table td, table th { border-color: rgba(255,255,255,0.15) !important; }
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item"><a class="nav-link" href="dashboard.php">Dashboard</a></li>
+        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+        <li class="nav-item"><a class="nav-link" href="users_admin.php">Users</a></li>
+        <?php endif; ?>
         <li class="nav-item"><a class="nav-link" href="profile.php">Profile</a></li>
         <li class="nav-item"><a class="nav-link active" href="submissions.php">Submissions</a></li>
         <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
@@ -204,12 +207,12 @@ table td, table th { border-color: rgba(255,255,255,0.15) !important; }
             <th scope="col">Type</th>
             <th scope="col">Content</th>
             <th scope="col">Details</th>
-            <th scope="col" style="width:80px">Actions</th>
+            <th scope="col" style="width:160px">Actions</th>
           </tr>
         </thead>
         <tbody>
           <?php foreach ($rows as $doc): ?>
-            <tr>
+            <tr style="white-space: nowrap;">
               <td>
                 <?php
                   $ts = isset($doc->submitted_at) && $doc->submitted_at instanceof MongoDB\BSON\UTCDateTime
@@ -251,6 +254,10 @@ table td, table th { border-color: rgba(255,255,255,0.15) !important; }
               </td>
               <td>
                 <?php $idAttr = 'm'.substr(md5((string)($doc->_id ?? uniqid())), 0, 8); ?>
+                <form method="POST" action="admin_delete_submission.php" style="display:inline;margin-right:6px;" onsubmit="return confirm('Delete this submission?');">
+                  <input type="hidden" name="id" value="<?= htmlspecialchars((string)$doc->_id ?? '') ?>">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
                 <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#<?= $idAttr ?>">View</button>
               </td>
             </tr>
