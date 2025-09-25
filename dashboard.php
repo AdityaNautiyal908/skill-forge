@@ -56,6 +56,26 @@ try {
 } catch (Throwable $e) {
     $mcqCount = 0;
 }
+
+// Fetch recent comments for display
+$comments = [];
+try {
+    $commentsColl = getCollection('coding_platform', 'comments');
+    $commentsQuery = new MongoDB\Driver\Query([], ['sort' => ['created_at' => -1], 'limit' => 6]);
+    $commentsResult = $commentsColl['manager']->executeQuery($commentsColl['db'] . ".comments", $commentsQuery)->toArray();
+    $comments = array_map(function($doc) {
+        return [
+            'username' => $doc->username,
+            'comment' => $doc->comment,
+            'rating' => $doc->rating ?? 0,
+            'created_at' => $doc->created_at
+        ];
+    }, $commentsResult);
+} catch (Throwable $e) {
+    $comments = [];
+    // Debug: Uncomment the line below to see error details
+    // error_log("Comments fetch error: " . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
@@ -147,8 +167,78 @@ body {
 @keyframes spin { to { transform: rotate(360deg);} }
 @keyframes pulse { 0%,100%{ opacity:.28; transform: translateY(0);} 50%{ opacity:.5; transform: translateY(-6px);} }
 .heading { font-weight: 800; }
+
+/* Floating comment button */
+.floating-comment-btn {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    z-index: 1000;
+    animation: float 3s ease-in-out infinite;
+}
+.floating-comment-btn .btn {
+    border-radius: 25px;
+    padding: 12px 20px;
+    font-weight: 600;
+    box-shadow: 0 8px 30px rgba(110,142,251,0.4);
+}
+
+/* Comment card specific styles */
+.comment-card {
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transition: transform .1s ease, box-shadow .2s ease, background .25s ease, border-color .25s ease;
+    will-change: transform;
+    background-image: var(--spotGradient, none), linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+}
+
+.comment-card::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    padding: 2px;
+    background: conic-gradient(from 0deg, var(--c1), var(--c2), var(--c3), var(--c1));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: spin 8s linear infinite;
+    pointer-events: none;
+}
+
+.comment-card::after {
+    content: "";
+    position: absolute;
+    inset: -30% -20% auto -20%;
+    height: 120%;
+    background: radial-gradient(closest-side, var(--glow) 0%, transparent 60%);
+    filter: blur(16px);
+    opacity: .35;
+    animation: pulse 4.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.comment-card:hover {
+    box-shadow: 0 20px 46px rgba(0,0,0,.35);
+}
+
+/* Comment card hover effects with different color palettes */
+.comment-card.f1:hover { border-color: rgba(110,142,251,0.35); }
+.comment-card.f2:hover { border-color: rgba(255,126,179,0.35); }
+.comment-card.f3:hover { border-color: rgba(62,207,142,0.35); }
+.comment-card.f4:hover { border-color: rgba(255,165,0,0.35); }
+
 @media (max-width: 576px){
   .progress { width: 160px !important; }
+  .floating-comment-btn {
+    bottom: 70px;
+    right: 15px;
+  }
+  .floating-comment-btn .btn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
 }
 </style>
 </head>
@@ -176,6 +266,9 @@ body {
                 <?php endif; ?>
                 <li class="nav-item">
                     <a class="nav-link" href="leaderboard.php">Leaderboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="comment.php">Leave Feedback</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="logout.php">Logout</a>
@@ -213,6 +306,58 @@ body {
             </div>
         <?php endif; ?>
     </div>
+    
+    <!-- Floating Comment Button -->
+    <div class="floating-comment-btn">
+        <a href="comment.php" class="btn btn-primary btn-animated" title="Leave Feedback">
+            💬 Feedback
+        </a>
+    </div>
+    
+    <!-- Comments Section -->
+    <?php if (!empty($comments)): ?>
+    <div class="mt-5">
+        <h3 class="mb-4 heading">What Our Users Say</h3>
+        <div class="row">
+            <?php foreach ($comments as $comment): 
+                $commentPalettes = ['f1','f2','f3','f4']; 
+                static $commentIndex = 0; 
+                $commentClass = $commentPalettes[$commentIndex % 4]; 
+                $commentIndex++; 
+            ?>
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card shadow-sm h-100 comment-card feature <?= $commentClass ?>">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-0"><?= htmlspecialchars($comment['username']) ?></h6>
+                                <?php if ($comment['rating'] > 0): ?>
+                                    <div class="rating">
+                                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                                            <span style="color: <?= $i <= $comment['rating'] ? '#ffd700' : '#666' ?>">★</span>
+                                        <?php endfor; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <p class="card-text"><?= htmlspecialchars($comment['comment']) ?></p>
+                            <small class="text-muted">
+                                <?= date('M j, Y', $comment['created_at']->toDateTime()->getTimestamp()) ?>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <div class="text-center mt-4">
+            <a href="comment.php" class="btn btn-primary btn-animated">Share Your Feedback</a>
+        </div>
+    </div>
+    <?php else: ?>
+    <div class="mt-5 text-center">
+        <h3 class="mb-4 heading">Be the First to Share Feedback!</h3>
+        <p class="subtitle mb-4">Help us improve SkillForge by sharing your experience</p>
+        <a href="comment.php" class="btn btn-primary btn-animated">Leave Your Comment</a>
+    </div>
+    <?php endif; ?>
 </div>
 </body>
 </html>
@@ -257,7 +402,7 @@ body {
 })();
 </script>
 <script>
-// Pointer-based 3D tilt for dashboard feature cards
+// Pointer-based 3D tilt for dashboard feature cards and comment cards
 (function(){
   var cards = document.querySelectorAll('.feature');
   if (!cards || cards.length === 0) return;
