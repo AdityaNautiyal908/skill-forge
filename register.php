@@ -53,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SkillForge — Create Account</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Using custom SVG icons for eye/eye-off -->
 <style>
 body { margin:0; color:white; min-height:100vh; display:flex; align-items:center; justify-content:center; background: radial-gradient(1200px 600px at 10% 10%, rgba(167,119,227,0.25), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(110,142,251,0.25), transparent 60%), linear-gradient(135deg, #0f1020, #111437 60%, #0a0d2a); overflow:hidden; }
 .light { color:#2d3748 !important; background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%), linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0) !important; }
@@ -71,7 +72,7 @@ body { margin:0; color:white; min-height:100vh; display:flex; align-items:center
 .light .o1{ background:#ffd54f !important; }
 .light .o2{ background:#ffb300 !important; }
 @keyframes float { 0%,100%{ transform:translateY(0)} 50%{ transform:translateY(-14px)} }
-.auth-card { position:relative; z-index:1; width:100%; max-width:480px; padding:28px; border-radius:16px; background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.08); box-shadow:0 10px 40px rgba(0,0,0,0.35); }
+.auth-card { position:relative; z-index:1000; width:100%; max-width:480px; padding:28px; border-radius:16px; background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.08); box-shadow:0 10px 40px rgba(0,0,0,0.35); }
 .brand { display:inline-block; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.06); font-weight:600; margin-bottom:10px; }
 .title { font-weight:800; margin:0 0 6px 0; }
 .subtitle { color: rgba(255,255,255,0.8); margin-bottom: 18px; }
@@ -85,6 +86,76 @@ body { margin:0; color:white; min-height:100vh; display:flex; align-items:center
 .alt { color: rgba(255,255,255,0.8); }
 .alt a { color: #cfd8ff; text-decoration: none; }
 .alt a:hover { text-decoration: underline; }
+
+/* Password toggle styles */
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s ease, background 0.2s ease;
+    z-index: 10;
+}
+
+.password-toggle:hover {
+    color: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.1);
+}
+
+.password-toggle .eye-svg {
+    width: 22px;
+    height: 22px;
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 22px 22px;
+    filter: drop-shadow(0 0 0 rgba(0,0,0,0));
+    transition: transform .2s ease, opacity .2s ease;
+}
+
+.password-toggle.active .eye-svg { transform: scale(1.05); }
+
+.password-input-wrapper .form-control {
+    padding-right: 45px; /* Make room for the toggle button */
+}
+
+/* Alert styles */
+.alert {
+    border-radius: 10px;
+    border: none;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    font-weight: 500;
+    position: relative;
+    z-index: 10000; /* Higher than animation buttons */
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.alert-danger {
+    background: rgba(220, 53, 69, 0.2);
+    color: #f8d7da;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.alert-success {
+    background: rgba(40, 167, 69, 0.2);
+    color: #d4edda;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+    backdrop-filter: blur(10px);
+}
 </style>
 </head>
 <body>
@@ -97,7 +168,12 @@ body { margin:0; color:white; min-height:100vh; display:flex; align-items:center
     <span class="brand">SkillForge</span>
     <h2 class="title">Create your account</h2>
     <p class="subtitle">Join SkillForge and start building your coding superpowers.</p>
-    <?php if($message) echo "<div class='alert alert-danger'>$message</div>"; ?>
+    <?php if($message): ?>
+        <div class="alert alert-danger">
+            <strong>⚠️ Registration Error:</strong><br>
+            <?= htmlspecialchars($message) ?>
+        </div>
+    <?php endif; ?>
     <form method="POST" action="" id="registerForm" novalidate>
         <div class="mb-3">
             <label class="form-label">Username</label>
@@ -109,13 +185,23 @@ body { margin:0; color:white; min-height:100vh; display:flex; align-items:center
         </div>
         <div class="mb-3">
             <label class="form-label">Password</label>
-            <input type="password" name="password" id="password" class="form-control" required minlength="8">
+            <div class="password-input-wrapper">
+                <input type="password" name="password" id="password" class="form-control" required minlength="8">
+                <button type="button" class="password-toggle" id="togglePassword" title="Show/Hide Password">
+                    <span class="eye-svg" aria-hidden="true"></span>
+                </button>
+            </div>
             <div class="hint mt-1">Min 8 chars, include uppercase, lowercase, number, and symbol.</div>
             <div class="strength mt-2"><div class="strength-bar" id="pwBar"></div></div>
         </div>
         <div class="mb-3">
             <label class="form-label">Confirm Password</label>
-            <input type="password" id="confirmPassword" class="form-control" required>
+            <div class="password-input-wrapper">
+                <input type="password" id="confirmPassword" class="form-control" required>
+                <button type="button" class="password-toggle" id="toggleConfirmPassword" title="Show/Hide Password">
+                    <span class="eye-svg" aria-hidden="true"></span>
+                </button>
+            </div>
         </div>
         <button type="submit" class="btn btn-primary-glow">Create account</button>
         <p class="mt-3 text-center alt">Already have an account? <a href="login.php">Login</a></p>
@@ -131,7 +217,7 @@ body { margin:0; color:white; min-height:100vh; display:flex; align-items:center
   toastBox.style.position = 'fixed';
   toastBox.style.bottom = '16px';
   toastBox.style.right = '16px';
-  toastBox.style.zIndex = '9999';
+  toastBox.style.zIndex = '10001'; /* Higher than animation buttons */
   document.body.appendChild(toastBox);
   function showToast(msg, variant){
     var t = document.createElement('div');
@@ -181,13 +267,64 @@ body { margin:0; color:white; min-height:100vh; display:flex; align-items:center
     }
   });
 })();
+
+// Password toggle functionality
+(function(){
+  // Inline SVG paths for eye and eye-off (clean, brand-neutral)
+  var EYE = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5C7 5 3.1 8.1 1.5 12c1.6 3.9 5.5 7 10.5 7s8.9-3.1 10.5-7C20.9 8.1 17 5 12 5Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.5" stroke="currentColor" stroke-width="1.6"/></svg>';
+  var EYE_OFF = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3l18 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M9.88 9.88A3.5 3.5 0 0012 15.5c1.93 0 3.5-1.57 3.5-3.5 0-.54-.12-1.05-.34-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M4.2 7.51C6.02 6.03 8.79 5 12 5c5 0 8.9 3.1 10.5 7-.65 1.59-1.73 3.03-3.11 4.22M7.5 16.5C5.86 15.6 4.54 14.38 3.5 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function togglePasswordVisibility(inputId, toggleId) {
+    var input = document.getElementById(inputId);
+    var toggle = document.getElementById(toggleId);
+    var icon = toggle.querySelector('.eye-svg');
+    
+    if (!input || !toggle) return;
+    
+    // Initialize icon
+    icon.innerHTML = EYE;
+
+    toggle.addEventListener('click', function() {
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = EYE_OFF;
+        toggle.classList.add('active');
+      } else {
+        input.type = 'password';
+        icon.innerHTML = EYE;
+        toggle.classList.remove('active');
+      }
+    });
+  }
+  
+  // Initialize password toggles
+  togglePasswordVisibility('password', 'togglePassword');
+  togglePasswordVisibility('confirmPassword', 'toggleConfirmPassword');
+  
+  // Real-time password matching validation
+  var password = document.getElementById('password');
+  var confirmPassword = document.getElementById('confirmPassword');
+  
+  function checkPasswordMatch() {
+    if (confirmPassword.value && password.value !== confirmPassword.value) {
+      confirmPassword.style.borderColor = '#dc3545';
+      confirmPassword.style.boxShadow = '0 0 0 0.2rem rgba(220,53,69,0.25)';
+    } else {
+      confirmPassword.style.borderColor = '';
+      confirmPassword.style.boxShadow = '';
+    }
+  }
+  
+  password && password.addEventListener('input', checkPasswordMatch);
+  confirmPassword && confirmPassword.addEventListener('input', checkPasswordMatch);
+})();
 </script>
 <script>
 // Toggles
 (function(){
   function apply(){ var theme=localStorage.getItem('sf_theme')||'dark'; var anim=localStorage.getItem('sf_anim')||'on'; document.body.classList.toggle('light', theme==='light'); document.body.classList.toggle('no-anim', anim==='off'); }
   apply();
-  var box=document.createElement('div'); box.style.position='fixed'; box.style.right='14px'; box.style.bottom='14px'; box.style.zIndex='9999'; box.style.display='flex'; box.style.gap='8px';
+  var box=document.createElement('div'); box.style.position='fixed'; box.style.right='14px'; box.style.bottom='14px'; box.style.zIndex='9998'; box.style.display='flex'; box.style.gap='8px';
   function mk(label){ var b=document.createElement('button'); b.textContent=label; b.style.border='1px solid rgba(255,255,255,0.4)'; b.style.background='rgba(0,0,0,0.35)'; b.style.color='#fff'; b.style.padding='8px 12px'; b.style.borderRadius='10px'; b.style.backdropFilter='blur(6px)'; return b; }
   var tBtn=mk((localStorage.getItem('sf_theme')||'dark')==='light'?'Dark Mode':'Light Mode');
   var aBtn=mk((localStorage.getItem('sf_anim')||'on')==='off'?'Enable Anim':'Disable Anim');
