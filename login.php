@@ -98,7 +98,7 @@ body {
 
 <div class="auth-card mx-3">
     <span class="brand">SkillForge</span>
-    <h2 class="title">Welcome back</h2>
+    <h2 class="title" align="center">Welcome</h2>
     <p class="subtitle">Log in to continue your learning journey.</p>
     <?php if($message) echo "<div class='alert alert-danger'>$message</div>"; ?>
     <form method="POST" action="">
