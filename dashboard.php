@@ -229,6 +229,15 @@ body {
 .comment-card.f3:hover { border-color: rgba(62,207,142,0.35); }
 .comment-card.f4:hover { border-color: rgba(255,165,0,0.35); }
 
+/* Respect global animation toggle: hide card line effects when animations are off */
+.no-anim .feature::before,
+.no-anim .feature::after,
+.no-anim .comment-card::before,
+.no-anim .comment-card::after {
+    display: none !important;
+    animation: none !important;
+}
+
 @media (max-width: 576px){
   .progress { width: 160px !important; }
   .floating-comment-btn {
