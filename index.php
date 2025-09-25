@@ -25,10 +25,10 @@ body {
     justify-content: center;
     flex-direction: column;
     overflow-x: hidden;
-    overflow-y: hidden; /* lock vertical scroll for single-screen hero */
-    background: radial-gradient(1200px 600px at 10% 10%, rgba(167,119,227,0.25), transparent 60%),
-                radial-gradient(1000px 600px at 90% 30%, rgba(110,142,251,0.25), transparent 60%),
-                linear-gradient(135deg, #0f1020, #111437 60%, #0a0d2a);
+    overflow-y: hidden;
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(76,91,155,0.35), transparent 60%),
+                radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%),
+                linear-gradient(135deg, #171b30, #20254a 55%, #3c467b);
 }
 
 /* Light theme override */
@@ -38,58 +38,43 @@ body.light {
                 radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%),
                 linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0);
 }
-body.light .title, body.light h1, body.light h2, body.light h3, body.light h4, body.light h5, body.light h6 {
-    color: #1a202c !important;
-}
-body.light .subtitle, body.light p, body.light .desc, body.light .card-text {
-    color: #4a5568 !important;
-}
+body.light .title, body.light h1, body.light h2, body.light h3, body.light h4, body.light h5, body.light h6 { color: #1a202c !important; }
+body.light .subtitle, body.light p, body.light .desc, body.light .card-text { color: #4a5568 !important; }
 
 /* Floating orbs */
-.orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(20px);
-    opacity: 0.5;
-    animation: float 12s ease-in-out infinite;
-}
-.orb.o1 { width: 220px; height: 220px; background: #6e8efb; top: 10%; left: -60px; animation-delay: 0s; }
-.orb.o2 { width: 280px; height: 280px; background: #a777e3; bottom: -80px; right: 10%; animation-delay: 2s; }
-.orb.o3 { width: 160px; height: 160px; background: #36d1dc; top: 30%; right: -60px; animation-delay: 4s; }
+.orb { position: absolute; border-radius: 50%; filter: blur(20px); opacity: 0.45; animation: float 12s ease-in-out infinite; }
+.orb.o1 { width: 220px; height: 220px; background: #6d7cff; top: 10%; left: -60px; animation-delay: 0s; }
+.orb.o2 { width: 280px; height: 280px; background: #7aa2ff; bottom: -80px; right: 10%; animation-delay: 2s; }
+.orb.o3 { width: 160px; height: 160px; background: #9fb0ff; top: 30%; right: -60px; animation-delay: 4s; }
 
 /* Light theme orb colors: warm yellow glow */
 body.light .orb.o1 { background: #ffd54f; }
 body.light .orb.o2 { background: #ffb300; }
 body.light .orb.o3 { background: #ffe082; }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0) translateX(0); }
-    50% { transform: translateY(-20px) translateX(10px); }
-}
+@keyframes float { 0%, 100% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-20px) translateX(10px); } }
 
 /* Starfield */
-.stars {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.8), transparent 60%),
-                radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.6), transparent 60%),
-                radial-gradient(1px 1px at 65% 25%, rgba(255,255,255,0.7), transparent 60%),
-                radial-gradient(1px 1px at 80% 55%, rgba(255,255,255,0.5), transparent 60%);
-    opacity: 0.6;
-    pointer-events: none;
-}
+.stars { position: fixed; inset: 0; background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.7), transparent 60%), radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.55), transparent 60%), radial-gradient(1px 1px at 65% 25%, rgba(255,255,255,0.6), transparent 60%), radial-gradient(1px 1px at 80% 55%, rgba(255,255,255,0.45), transparent 60%); opacity: 0.45; pointer-events: none; }
 
 /* Electric web canvas overlay */
-#web {
-    position: fixed;
-    inset: 0;
-    z-index: 0; /* behind hero but above gradient background */
-    pointer-events: none;
-}
+#web { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
 /* Disable animation helper */
 body.no-anim .orb, body.no-anim .stars, body.no-anim #web { display: none !important; }
 body.no-anim .title { animation: none !important; }
+
+/* Buttons */
+.btn-primary-glow { background: linear-gradient(135deg, #6d7cff, #7aa2ff); border: none; color: white; padding: 12px 22px; border-radius: 12px; box-shadow: 0 8px 30px rgba(109,124,255,0.35); transition: transform .2s ease, box-shadow .2s ease, background .25s ease, filter .2s ease; }
+.btn-primary-glow:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(109,124,255,0.5); background: linear-gradient(135deg, #7b88ff, #8fb1ff); filter: brightness(1.05); }
+.btn-primary-glow:active { transform: translateY(0); background: linear-gradient(135deg, #5a69f0, #6e90ff); filter: brightness(.98); }
+.btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: white; padding: 12px 22px; border-radius: 12px; backdrop-filter: blur(6px); }
+
+/* Cards/panels */
+.feature { background: linear-gradient(180deg, rgba(60,70,123,0.42), rgba(60,70,123,0.18)); border: 1px solid rgba(255,255,255,0.14); }
+/* Respect global animation toggle for landing feature cards */
+body.no-anim .feature::before,
+body.no-anim .feature::after { display:none !important; animation:none !important; }
 
 /* Toggles */
 .controls { position: fixed; right: 14px; bottom: 14px; z-index: 9999; display: flex; gap: 8px; }
@@ -176,15 +161,6 @@ body.light .toggle-btn { border-color: rgba(0,0,0,0.3); background:rgba(255,255,
     gap: 12px;
     justify-content: center;
     flex-wrap: wrap;
-}
-.btn-primary-glow {
-    background: linear-gradient(135deg, #6e8efb, #a777e3);
-    border: none;
-    color: white;
-    padding: 12px 22px;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(110,142,251,0.35);
-    transition: transform .2s ease, box-shadow .2s ease, background .25s ease, filter .2s ease;
 }
 .btn-primary-glow:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(110,142,251,0.5); background: linear-gradient(135deg, #7f9bff, #b48af3); filter: brightness(1.05); }
 .btn-primary-glow:active { transform: translateY(0); background: linear-gradient(135deg, #5c78ef, #905fdc); filter: brightness(.98); }

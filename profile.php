@@ -131,11 +131,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <title>SkillForge — Profile</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200px 600px at 10% 10%, rgba(167,119,227,0.25), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(110,142,251,0.25), transparent 60%), linear-gradient(135deg, #0f1020, #111437 60%, #0a0d2a); }
+body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200px 600px at 10% 10%, rgba(76,91,155,0.35), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%), linear-gradient(135deg, #171b30, #20254a 55%, #3c467b); }
 .light { color:#2d3748 !important; background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%), linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0) !important; }
-.panel { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.08); border-radius:16px; }
-.navbar { background: rgba(0,0,0,0.35) !important; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.08); }
-.btn-primary { background: linear-gradient(135deg, #6e8efb, #a777e3); border:none; box-shadow: 0 8px 30px rgba(110,142,251,0.35); }
+.panel { background: linear-gradient(180deg, rgba(60,70,123,0.42), rgba(60,70,123,0.18)); border:1px solid rgba(255,255,255,0.14); border-radius:16px; }
+.navbar { background: rgba(10,12,28,0.45) !important; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.12); }
+.btn-primary { background: linear-gradient(135deg, #6d7cff, #7aa2ff); border:none; box-shadow: 0 8px 30px rgba(109,124,255,0.35); }
 .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: white; }
 </style>
 </head>

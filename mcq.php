@@ -70,7 +70,7 @@ $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
 <title>SkillForge — MCQ Practice</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200px 600px at 10% 10%, rgba(167,119,227,0.25), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(110,142,251,0.25), transparent 60%), linear-gradient(135deg, #0f1020, #111437 60%, #0a0d2a); }
+body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200px 600px at 10% 10%, rgba(76,91,155,0.35), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%), linear-gradient(135deg, #171b30, #20254a 55%, #3c467b); }
 .light { color:#2d3748 !important; background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%), linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0) !important; }
 .light .title, .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
     color: #1a202c !important;
@@ -78,8 +78,8 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
 .light .subtitle, .light p, .light .desc, .light .card-text {
     color: #4a5568 !important;
 }
-.panel { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:18px; }
-.btn-primary { background: linear-gradient(135deg, #6e8efb, #a777e3); border:none; box-shadow: 0 8px 30px rgba(110,142,251,0.35); transition: transform .2s ease, box-shadow .2s ease, background .25s ease, filter .2s ease; }
+.panel { background: linear-gradient(180deg, rgba(60,70,123,0.42), rgba(60,70,123,0.18)); border:1px solid rgba(255,255,255,0.14); border-radius:16px; padding:18px; }
+.btn-primary { background: linear-gradient(135deg, #6d7cff, #7aa2ff); border:none; box-shadow: 0 8px 30px rgba(109,124,255,0.35); transition: transform .2s ease, box-shadow .2s ease, background .25s ease, filter .2s ease; }
 .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 34px rgba(110,142,251,0.5); background: linear-gradient(135deg, #7f9bff, #b48af3); filter: brightness(1.05); }
 .btn-primary:active { transform: translateY(0); background: linear-gradient(135deg, #5c78ef, #905fdc); filter: brightness(.98); }
 .btn-animated { position: relative; overflow:hidden; }
