@@ -61,7 +61,7 @@ try {
 $comments = [];
 try {
     $commentsColl = getCollection('coding_platform', 'comments');
-    $commentsQuery = new MongoDB\Driver\Query([], ['sort' => ['created_at' => -1], 'limit' => 6]);
+    $commentsQuery = new MongoDB\Driver\Query([], ['sort' => ['created_at' => -1], 'limit' => 100]);
     $commentsResult = $commentsColl['manager']->executeQuery($commentsColl['db'] . ".comments", $commentsQuery)->toArray();
     $comments = array_map(function($doc) {
         return [
@@ -318,7 +318,20 @@ body {
     <?php if (!empty($comments)): ?>
     <div class="mt-5">
         <h3 class="mb-4 heading">What Our Users Say</h3>
-        <div class="row">
+
+        <!-- LTR carousel (cards source is hidden below) -->
+        <div id="commentsCarousel" class="comments-carousel" aria-live="polite">
+            <div class="track" id="commentsCarouselTrack"></div>
+            <div class="controls" id="commentsCarouselControls" aria-label="Carousel controls">
+                <button type="button" class="ctrl-btn" id="ccPrev" title="Previous">◀</button>
+                <button type="button" class="ctrl-btn" id="ccPlayPause" title="Pause">❚❚</button>
+                <button type="button" class="ctrl-btn" id="ccNext" title="Next">▶</button>
+            </div>
+        </div>
+
+        <!-- Hidden source with all cards (not shown, used to populate the carousel) -->
+        <div id="commentsSource" style="display:none;">
+            <div class="row">
             <?php foreach ($comments as $comment): 
                 $commentPalettes = ['f1','f2','f3','f4']; 
                 static $commentIndex = 0; 
@@ -346,7 +359,9 @@ body {
                     </div>
                 </div>
             <?php endforeach; ?>
+            </div>
         </div>
+
         <div class="text-center mt-4">
             <a href="comment.php" class="btn btn-primary btn-animated">Share Your Feedback</a>
         </div>
@@ -399,6 +414,83 @@ body {
   tBtn.onclick=function(){ var cur=localStorage.getItem('sf_theme')||'dark'; var next=cur==='dark'?'light':'dark'; localStorage.setItem('sf_theme',next); tBtn.textContent=next==='light'?'Dark Mode':'Light Mode'; apply(); };
   aBtn.onclick=function(){ var cur=localStorage.getItem('sf_anim')||'on'; var next=cur==='on'?'off':'on'; localStorage.setItem('sf_anim',next); aBtn.textContent=next==='off'?'Enable Anim':'Disable Anim'; apply(); };
   box.appendChild(tBtn); box.appendChild(aBtn); document.body.appendChild(box);
+})();
+</script>
+<script>
+// Comments LTR carousel: continuous scrolling of full cards (built from hidden source)
+(function(){
+  var wrap = document.getElementById('commentsCarousel');
+  var track = document.getElementById('commentsCarouselTrack');
+  var source = document.getElementById('commentsSource');
+  if (!wrap || !track || !source) return;
+
+  // Inject minimal styles
+  var css = document.createElement('style');
+  css.textContent = '\n.comments-carousel{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.08);border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));margin-bottom:16px;}\n.comments-carousel .track{display:flex;gap:18px;align-items:stretch;will-change:transform;padding:12px;}\n.comments-carousel .comment-card{min-width:420px;width:420px;}\n.comments-carousel .controls{position:absolute;right:10px;bottom:10px;display:flex;gap:8px;z-index:2}\n.comments-carousel .ctrl-btn{border:1px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.35);color:#fff;padding:6px 10px;border-radius:8px;backdrop-filter:blur(6px);cursor:pointer}\n.comments-carousel .ctrl-btn:hover{background:rgba(255,255,255,0.15)}\n@media (max-width:576px){ .comments-carousel .comment-card{min-width:320px;width:320px;} }';
+  document.head.appendChild(css);
+
+  // Gather cards from hidden source
+  var cards = Array.prototype.slice.call(source.querySelectorAll('.comment-card'));
+  if (!cards.length) return;
+  var cardWidth = null; // computed later
+  var html = cards.map(function(c){ return c.outerHTML; }).join('');
+  track.innerHTML = html + html; // duplicate for seamless loop
+
+  var totalWidth = 0;
+  function recalc(){ totalWidth = track.scrollWidth / 2; var first = track.querySelector('.comment-card'); cardWidth = first ? first.getBoundingClientRect().width + 18 /* gap */ : 420; }
+  recalc();
+  window.addEventListener('resize', function(){ setTimeout(recalc, 100); });
+
+  // Animate left-to-right
+  var offset = -totalWidth;
+  var speed = 40; // px/s
+  var last = null;
+  var paused = false;
+  var rafId = null;
+  function step(ts){
+    if (paused) { rafId = requestAnimationFrame(step); return; }
+    if (last == null) last = ts;
+    var dt = (ts - last) / 1000; last = ts;
+    offset += speed * dt;
+    if (offset >= 0) offset = -totalWidth;
+    track.style.transform = 'translateX(' + offset + 'px)';
+    rafId = requestAnimationFrame(step);
+  }
+  rafId = requestAnimationFrame(step);
+
+  // Controls
+  var prevBtn = document.getElementById('ccPrev');
+  var nextBtn = document.getElementById('ccNext');
+  var playPauseBtn = document.getElementById('ccPlayPause');
+
+  function jump(delta){
+    // Stop momentarily to avoid fighting animation frame
+    paused = true;
+    // snap by one card width left (-) or right (+). Since LTR, right is increasing offset
+    offset += delta;
+    // wrap handling
+    while (offset >= 0) offset -= totalWidth;
+    while (offset < -totalWidth) offset += totalWidth;
+    track.style.transform = 'translateX(' + offset + 'px)';
+    // small delay then resume if play state is not paused by user
+    setTimeout(function(){ if (playPauseBtn.getAttribute('data-paused') !== 'true') { paused = false; } }, 50);
+  }
+
+  if (prevBtn) prevBtn.addEventListener('click', function(){ jump(-cardWidth); });
+  if (nextBtn) nextBtn.addEventListener('click', function(){ jump(cardWidth); });
+  if (playPauseBtn) playPauseBtn.addEventListener('click', function(){
+    var isPaused = this.getAttribute('data-paused') === 'true';
+    if (isPaused) {
+      this.setAttribute('data-paused', 'false');
+      this.textContent = '❚❚';
+      paused = false;
+      last = null; // reset timing for smooth resume
+    } else {
+      this.setAttribute('data-paused', 'true');
+      this.textContent = '►';
+      paused = true;
+    }
+  });
 })();
 </script>
 <script>
