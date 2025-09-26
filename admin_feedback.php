@@ -236,7 +236,10 @@ body {
                                 <td>
                                     <div class="d-flex gap-2">
                                         <?php if (!isset($comment->deleted) || !$comment->deleted): ?>
-                                            <button class="btn btn-warning btn-sm" onclick="editComment('<?= (string)$comment->_id ?>', '<?= htmlspecialchars($comment->comment, ENT_QUOTES) ?>', <?= $comment->rating ?>)">
+                                            <button class="btn btn-warning btn-sm edit-comment-btn" 
+                                                    data-comment-id="<?= htmlspecialchars((string)$comment->_id) ?>"
+                                                    data-comment-text="<?= htmlspecialchars($comment->comment, ENT_QUOTES) ?>"
+                                                    data-comment-rating="<?= $comment->rating ?>">
                                                 Edit
                                             </button>
                                             <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this comment?');">
@@ -296,14 +299,31 @@ body {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function editComment(id, text, rating) {
-    document.getElementById('edit_comment_id').value = id;
-    document.getElementById('edit_comment_text').value = text;
-    document.getElementById('edit_rating').value = rating;
-    
-    var modal = new bootstrap.Modal(document.getElementById('editCommentModal'));
-    modal.show();
-}
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners to all edit buttons
+    document.querySelectorAll('.edit-comment-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            try {
+                var commentId = this.getAttribute('data-comment-id');
+                var commentText = this.getAttribute('data-comment-text');
+                var commentRating = this.getAttribute('data-comment-rating');
+                
+                // Set form values
+                document.getElementById('edit_comment_id').value = commentId;
+                document.getElementById('edit_comment_text').value = commentText || '';
+                document.getElementById('edit_rating').value = commentRating || 0;
+                
+                // Show modal
+                var modal = new bootstrap.Modal(document.getElementById('editCommentModal'));
+                modal.show();
+            } catch (error) {
+                console.error('Error opening edit modal:', error);
+                alert('Error opening edit form. Please try again.');
+            }
+        });
+    });
+});
 </script>
 
 <script>

@@ -57,11 +57,16 @@ try {
     $mcqCount = 0;
 }
 
-// Fetch recent comments for display
+// Fetch recent comments for display (excluding deleted ones)
 $comments = [];
 try {
     $commentsColl = getCollection('coding_platform', 'comments');
-    $commentsQuery = new MongoDB\Driver\Query([], ['sort' => ['created_at' => -1], 'limit' => 100]);
+    // Filter out deleted comments
+    $filter = ['$or' => [
+        ['deleted' => ['$exists' => false]], // Comments without deleted field
+        ['deleted' => false] // Comments explicitly marked as not deleted
+    ]];
+    $commentsQuery = new MongoDB\Driver\Query($filter, ['sort' => ['created_at' => -1], 'limit' => 100]);
     $commentsResult = $commentsColl['manager']->executeQuery($commentsColl['db'] . ".comments", $commentsQuery)->toArray();
     $comments = array_map(function($doc) {
         return [

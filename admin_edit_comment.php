@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['comment_id'])) {
     try {
         $coll = getCollection('coding_platform', 'comments');
         $bulk = new MongoDB\Driver\BulkWrite;
-        $bulk->update(
+        $result = $bulk->update(
             ['_id' => new MongoDB\BSON\ObjectId($comment_id)],
             ['$set' => [
                 'comment' => $comment_text,
@@ -46,10 +46,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['comment_id'])) {
             ]],
             ['upsert' => false]
         );
-        $coll['manager']->executeBulkWrite($coll['db'] . '.comments', $bulk);
-        header("Location: admin_feedback.php?message=" . urlencode("Comment updated successfully."));
+        $writeResult = $coll['manager']->executeBulkWrite($coll['db'] . '.comments', $bulk);
+        
+        // Check if the update was successful
+        if ($writeResult->getModifiedCount() > 0 || $writeResult->getMatchedCount() > 0) {
+            header("Location: admin_feedback.php?message=" . urlencode("Comment updated successfully."));
+        } else {
+            header("Location: admin_feedback.php?error=" . urlencode("Comment not found or no changes made."));
+        }
         exit;
     } catch (Exception $e) {
+        error_log("Edit comment error: " . $e->getMessage());
         header("Location: admin_feedback.php?error=" . urlencode("Failed to update comment: " . $e->getMessage()));
         exit;
     }
