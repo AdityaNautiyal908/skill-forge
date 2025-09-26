@@ -48,6 +48,7 @@ while ($row = $res->fetch_assoc()) { $users[] = $row; }
           <li class="nav-item"><a class="nav-link" href="dashboard.php">Dashboard</a></li>
           <li class="nav-item"><a class="nav-link active" href="users_admin.php">Users</a></li>
           <li class="nav-item"><a class="nav-link" href="submissions.php">Submissions</a></li>
+          <li class="nav-item"><a class="nav-link" href="admin_feedback.php">Feedback</a></li>
           <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
         </ul>
       </div>

@@ -163,6 +163,7 @@ table td, table th { border-color: rgba(255,255,255,0.15) !important; }
         <li class="nav-item"><a class="nav-link" href="dashboard.php">Dashboard</a></li>
         <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
         <li class="nav-item"><a class="nav-link" href="users_admin.php">Users</a></li>
+        <li class="nav-item"><a class="nav-link" href="admin_feedback.php">Feedback</a></li>
         <?php endif; ?>
         <li class="nav-item"><a class="nav-link" href="profile.php">Profile</a></li>
         <li class="nav-item"><a class="nav-link active" href="submissions.php">Submissions</a></li>
