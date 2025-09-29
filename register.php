@@ -162,6 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         .btn-guest { background: none; border: 1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.88); padding: 10px 16px; width: 100%; border-radius: 10px; margin-top: 10px; }
         .btn-guest:hover { background: rgba(255,255,255,0.08); }
+        .btn-generate-password { display: none; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -214,6 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </div>
             <button type="submit" class="btn btn-primary-glow" id="submitBtn">Create account</button>
+            <button type="button" class="btn btn-guest btn-generate-password" id="generatePasswordBtn">Generate Strong Password</button>
             <p class="mt-3 text-center alt">Already have an account? <a href="login.php">Login</a></p>
         </form>
         <form method="POST" action="">
@@ -245,6 +247,7 @@ Swal.fire({
     var passwordField = document.getElementById('password');
     var confirmPasswordField = document.getElementById('confirmPassword');
     var submitBtn = document.getElementById('submitBtn');
+    var generatePasswordBtn = document.getElementById('generatePasswordBtn');
 
     // Get requirement list items
     const lengthReq = document.getElementById('lengthReq');
@@ -260,6 +263,9 @@ Swal.fire({
         const hasLower = /[a-z]/.test(password);
         const hasDigit = /[0-9]/.test(password);
         const hasSymbol = /[^A-Za-z0-9]/.test(password);
+        
+        // Check if the password is weak
+        const isPasswordWeak = !(hasLength && hasUpper && hasLower && hasDigit && hasSymbol);
 
         // Update classes based on validation
         lengthReq.className = hasLength ? 'valid' : 'invalid';
@@ -268,17 +274,60 @@ Swal.fire({
         numberReq.className = hasDigit ? 'valid' : 'invalid';
         symbolReq.className = hasSymbol ? 'valid' : 'invalid';
         
+        // Show or hide the generate button based on password strength
+        if (password.length > 0 && isPasswordWeak) {
+            generatePasswordBtn.style.display = 'block';
+        } else {
+            generatePasswordBtn.style.display = 'none';
+        }
+        
         // Check if all fields are filled and password is valid
         const isFormValid = usernameField.value.trim() !== '' &&
                             emailField.value.trim() !== '' &&
                             passwordField.value.trim() !== '' &&
                             confirmPasswordField.value.trim() !== '' &&
-                            hasLength && hasUpper && hasLower && hasDigit && hasSymbol &&
+                            !isPasswordWeak &&
                             passwordField.value === confirmPasswordField.value;
         
         submitBtn.disabled = !isFormValid;
     }
     
+    // Function to generate a strong password
+    function generateStrongPassword() {
+        const length = 12; // Password length
+        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
+        let retVal = "";
+        const charTypes = {
+            'lower': 'abcdefghijklmnopqrstuvwxyz',
+            'upper': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            'digit': '0123456789',
+            'symbol': '!@#$%^&*()_+~`|}{[]:;?><,./-='
+        };
+        
+        // Ensure at least one of each character type
+        retVal += charTypes.lower[Math.floor(Math.random() * charTypes.lower.length)];
+        retVal += charTypes.upper[Math.floor(Math.random() * charTypes.upper.length)];
+        retVal += charTypes.digit[Math.floor(Math.random() * charTypes.digit.length)];
+        retVal += charTypes.symbol[Math.floor(Math.random() * charTypes.symbol.length)];
+
+        for (let i = retVal.length; i < length; i++) {
+            retVal += charset.charAt(Math.floor(Math.random() * charset.length));
+        }
+
+        // Shuffle the string
+        retVal = retVal.split('').sort(() => 0.5 - Math.random()).join('');
+        
+        return retVal;
+    }
+
+    // Event listener for the new button
+    generatePasswordBtn.addEventListener('click', function() {
+        const newPassword = generateStrongPassword();
+        passwordField.value = newPassword;
+        confirmPasswordField.value = newPassword;
+        validatePassword(); // Re-run validation to update UI
+    });
+
     // Add event listeners for real-time validation
     usernameField.addEventListener('input', validatePassword);
     emailField.addEventListener('input', validatePassword);

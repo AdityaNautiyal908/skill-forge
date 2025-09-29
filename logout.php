@@ -1,15 +1,11 @@
 <?php
-// logout.php
+session_start();
 
-session_start(); // Start the session
-
-// Unset all session variables
+// Unset all of the session variables.
 $_SESSION = array();
 
-// Destroy the session
-session_destroy();
-
-// Optionally, delete the session cookie
+// If it's desired to kill the session, also delete the session cookie.
+// Note: This will destroy the session, and not just the session data!
 if (ini_get("session.use_cookies")) {
     $params = session_get_cookie_params();
     setcookie(session_name(), '', time() - 42000,
@@ -18,7 +14,15 @@ if (ini_get("session.use_cookies")) {
     );
 }
 
-// Redirect the user to the login page (or home page)
+// Destroy the session.
+session_destroy();
+
+// Also clear the "remember me" cookie we set earlier
+if (isset($_COOKIE['remember_user_id'])) {
+    setcookie('remember_user_id', '', time() - 3600, "/"); // Unset the cookie
+}
+
+// Redirect to the login page
 header("Location: login.php");
 exit;
 ?>

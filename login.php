@@ -4,6 +4,23 @@ require_once "config/db_mysql.php";
 
 $message = "";
 
+// This is the auto-login check. It should be at the very top of your file.
+if (isset($_COOKIE['remember_user_id']) && !isset($_SESSION['user_id'])) {
+    $user_id = $_COOKIE['remember_user_id'];
+    $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows == 1) {
+        $user = $result->fetch_assoc();
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['role'] = isset($user['role']) ? $user['role'] : 'user';
+        header("Location: dashboard.php");
+        exit;
+    }
+}
 // Check if the guest button was clicked
 if (isset($_POST['guest_login'])) {
     $_SESSION['user_id'] = 'guest'; // Use a specific value to identify a guest user
@@ -16,6 +33,7 @@ if (isset($_POST['guest_login'])) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
+    $remember_me = isset($_POST['remember_me']);
 
     // Check for empty fields on the server-side as a security measure
     if (empty($email) || empty($password)) {
@@ -32,6 +50,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['role'] = isset($user['role']) ? $user['role'] : 'user';
+
+                // Set 'remember me' cookie if the checkbox was checked
+                if ($remember_me) {
+                    $expiry = time() + (86400 * 30); // 30 days
+                    setcookie('remember_user_id', $user['id'], $expiry, "/");
+                }
+
                 header("Location: dashboard.php");
                 exit;
             } else {
@@ -101,6 +126,7 @@ body {
 .alt { color: rgba(255,255,255,0.88); }
 .alt a { color: #cfd8ff; text-decoration: none; }
 .alt a:hover { text-decoration: underline; }
+.form-check { margin-top: -10px; margin-bottom: 18px; }
 </style>
 </head>
 <body>
@@ -116,11 +142,17 @@ body {
     <form method="POST" action="" id="loginForm" novalidate>
         <div class="mb-3">
             <label class="form-label">Email</label>
-            <input type="email" name="email" id="email" class="form-control" required>
+            <input type="email" name="email" id="email" class="form-control" autocomplete="username" required>
         </div>
         <div class="mb-3">
             <label class="form-label">Password</label>
-            <input type="password" name="password" id="password" class="form-control" required>
+            <input type="password" name="password" id="password" class="form-control" autocomplete="current-password" required>
+        </div>
+        <div class="form-check text-start">
+            <input class="form-check-input" type="checkbox" name="remember_me" id="rememberMe">
+            <label class="form-check-label" for="rememberMe">
+                Remember me
+            </label>
         </div>
         <button type="submit" class="btn btn-primary-glow">Login</button>
         <p class="mt-3 text-center alt">Don't have an account? <a href="register.php">Create one</a></p>
@@ -195,3 +227,4 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     document.body.appendChild(box); box.appendChild(tBtn); box.appendChild(aBtn);
 })();
 </script>
+
