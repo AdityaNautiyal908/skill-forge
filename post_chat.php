@@ -45,19 +45,44 @@ try {
         'timestamp' => new MongoDB\BSON\UTCDateTime(),
     ];
 
-    // CRITICAL FIX: Build the BulkWrite object correctly and pass it as the second argument.
+    // Build the BulkWrite object correctly and pass it as the second argument
     $bulk = new MongoDB\Driver\BulkWrite;
     $bulk->insert($document); 
 
-    $chatColl['manager']->executeBulkWrite(
+    $result = $chatColl['manager']->executeBulkWrite(
         $dbName . '.global_qa', // Argument 1: Namespace
         $bulk                   // Argument 2: The BulkWrite object
     );
-
-    echo json_encode(['success' => true]);
+    
+    if ($result->getInsertedCount() > 0) {
+        // Set notification for all users - but don't require the file
+        // Just create the notification directly
+        $notificationFile = __DIR__ . '/data/qa_notifications.json';
+        $dirPath = __DIR__ . '/data';
+        
+        // Create directory if it doesn't exist
+        if (!file_exists($dirPath)) {
+            mkdir($dirPath, 0777, true);
+        }
+        
+        // Set notification with current timestamp
+        $notifications = [
+            'has_new_message' => true,
+            'last_message_time' => time(),
+            'last_sender_id' => $userId
+        ];
+        
+        // Save notifications - overwrite any existing file
+        file_put_contents($notificationFile, json_encode($notifications));
+        
+        echo json_encode(['success' => true]);
+    } else {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Failed to insert message.']);
+    }
 
 } catch (Throwable $e) {
-    error_log("MongoDB Fatal Write Error: " . $e->getMessage()); 
     http_response_code(500);
-    die(json_encode(['success' => false, 'error' => 'Database error while posting message.']));
+    echo json_encode(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
+    error_log("Error posting message: " . $e->getMessage());
 }

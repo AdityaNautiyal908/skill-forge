@@ -29,14 +29,27 @@ try {
     // Debug: Log the last check time
     error_log("User ID: $userId, Last check: $lastCheck");
     
-    // Query for messages newer than last check
-    // Note: MongoDB timestamp is stored as ISO string
-    $filter = [];
-    if ($lastCheck > 0) {
-        $lastCheckDate = date('Y-m-d\TH:i:s', $lastCheck);
-        $filter = ['timestamp' => ['$gt' => $lastCheckDate]];
+    // Get the most recent message timestamp
+    $options = ['sort' => ['timestamp' => -1], 'limit' => 1];
+    $query = new MongoDB\Driver\Query([], $options);
+    $latestMessage = $chatColl['manager']->executeQuery($dbName . '.global_qa', $query)->toArray();
+    
+    // Check if there are any messages
+    if (count($latestMessage) > 0) {
+        $latestTimestamp = $latestMessage[0]->timestamp;
+        
+        // If user hasn't checked or last check is older than latest message
+        $filter = [];
+        if ($lastCheck > 0) {
+            $lastCheckDate = date('Y-m-d\TH:i:s', $lastCheck);
+            $filter = ['timestamp' => ['$gt' => $lastCheckDate]];
+        }
+        $options = ['projection' => ['_id' => 1]];
+    } else {
+        // No messages in the collection
+        $filter = [];
+        $options = ['projection' => ['_id' => 1]];
     }
-    $options = ['projection' => ['_id' => 1]];
     
     $query = new MongoDB\Driver\Query($filter, $options);
     $newMessages = $chatColl['manager']->executeQuery($dbName . '.global_qa', $query)->toArray();

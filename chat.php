@@ -20,17 +20,29 @@ require_once "config/db_mongo.php";
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        // Update last seen timestamp when page loads
+        // Update last seen timestamp and clear notifications when page loads
         $(document).ready(function() {
+            // Update last seen timestamp
             $.ajax({
                 url: 'update_last_seen.php',
                 type: 'POST',
-                dataType: 'json',
-                success: function(data) {
+                success: function(response) {
                     console.log('Last seen timestamp updated');
                 },
                 error: function(xhr, status, error) {
                     console.error('Error updating last seen timestamp:', error);
+                }
+            });
+            
+            // Clear notifications - using a simpler approach
+            $.ajax({
+                url: 'clear_notifications_simple.php',
+                type: 'GET',
+                success: function(response) {
+                    console.log('Notifications cleared');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error clearing notifications:', error);
                 }
             });
         });

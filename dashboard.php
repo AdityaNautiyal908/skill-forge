@@ -404,13 +404,21 @@ body {
 <script>
 // Function to check for new notifications
 function checkNotifications() {
-    fetch('check_notifications.php')
+    // Use a direct file check approach
+    fetch('check_notifications_simple.php')
         .then(response => response.json())
         .then(data => {
             console.log('Notification check:', data);
-            if (data.success && data.has_notifications) {
+            if (data.has_notifications) {
                 document.getElementById('qa-notification').style.display = 'inline';
-                document.getElementById('qa-notification').textContent = data.count > 1 ? data.count : 'New';
+                document.getElementById('qa-notification').textContent = 'New';
+                
+                // Play sound if notification wasn't showing before
+                if (document.getElementById('qa-notification').style.display === 'none') {
+                    playNotificationSound();
+                    // Flash the notification badge
+                    flashNotification();
+                }
             } else {
                 document.getElementById('qa-notification').style.display = 'none';
             }
@@ -420,11 +428,36 @@ function checkNotifications() {
         });
 }
 
+// Function to flash the notification badge
+function flashNotification() {
+    const badge = document.getElementById('qa-notification');
+    let flashCount = 0;
+    
+    const flashInterval = setInterval(() => {
+        badge.style.backgroundColor = flashCount % 2 === 0 ? '#dc3545' : '#28a745';
+        flashCount++;
+        
+        if (flashCount > 5) {
+            clearInterval(flashInterval);
+            badge.style.backgroundColor = '#dc3545'; // Reset to original color
+        }
+    }, 300);
+}
+
 // Check for notifications on page load
 checkNotifications();
 
-// Check for notifications every 30 seconds
-setInterval(checkNotifications, 30000);
+// Check for notifications every 5 seconds for real-time updates
+setInterval(checkNotifications, 5000);
+
+// Play notification sound when new messages arrive
+let previousCount = 0;
+function playNotificationSound() {
+    // Create audio element for notification sound
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+    audio.volume = 0.5;
+    audio.play().catch(e => console.log('Audio play prevented by browser policy'));
+}
 </script>
 </body>
 </html>
