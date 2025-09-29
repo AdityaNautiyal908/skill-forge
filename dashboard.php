@@ -540,9 +540,14 @@ function playNotificationSound() {
     var speed = 40; // px/s
     var last = null;
     var paused = false;
+    var isHovering = false; // New variable to track hover state
     var rafId = null;
+
     function step(ts){
-        if (paused) { rafId = requestAnimationFrame(step); return; }
+        if (paused || isHovering) { 
+            rafId = requestAnimationFrame(step); 
+            return; 
+        }
         if (last == null) last = ts;
         var dt = (ts - last) / 1000; last = ts;
         offset += speed * dt;
@@ -584,6 +589,60 @@ function playNotificationSound() {
             this.textContent = '►';
             paused = true;
         }
+    });
+
+    // Add event listeners to all comment cards
+    document.querySelectorAll('.comment-card').forEach(function(card) {
+        card.addEventListener('mouseenter', function() {
+            isHovering = true;
+        });
+        card.addEventListener('mouseleave', function() {
+            isHovering = false;
+        });
+    });
+
+})();
+</script>
+<script>
+// Pointer-based 3D tilt for dashboard feature cards and comment cards
+(function(){
+    var cards = document.querySelectorAll('.feature');
+    if (!cards || cards.length === 0) return;
+    var maxTilt = 10; // degrees
+
+    function setTransform(card, xRatio, yRatio){
+        // xRatio and yRatio are in [-0.5, 0.5]
+        var rotateX = (yRatio * -2) * maxTilt; // move up => tilt back
+        var rotateY = (xRatio * 2) * maxTilt;  // move right => tilt right
+        card.style.transform = 'perspective(800px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
+    }
+
+    function handleMove(e){
+        var card = e.currentTarget;
+        var rect = card.getBoundingClientRect();
+        var x = (e.clientX - rect.left) / Math.max(1, rect.width) - 0.5; // -0.5..0.5
+        var y = (e.clientY - rect.top) / Math.max(1, rect.height) - 0.5;  // -0.5..0.5
+        setTransform(card, x, y);
+        // Spotlight gradient following cursor
+        var px = (x + 0.5) * 100; // 0..100
+        var py = (y + 0.5) * 100; // 0..100
+        var glow = getComputedStyle(card).getPropertyValue('--glow') || 'rgba(110,142,251,.45)';
+        var spot = 'radial-gradient(300px 200px at ' + px + '% ' + py + '%, ' + glow + ', rgba(0,0,0,0) 70%)';
+        card.style.setProperty('--spotGradient', spot);
+    }
+
+    function reset(e){
+        var card = e.currentTarget;
+        card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg)';
+        card.style.removeProperty('--spotGradient');
+    }
+
+    cards.forEach(function(card){
+        card.addEventListener('mousemove', handleMove);
+        card.addEventListener('mouseleave', reset);
+        card.addEventListener('mouseenter', function(){
+            card.style.transition = 'transform .08s ease';
+        });
     });
 })();
 </script>
