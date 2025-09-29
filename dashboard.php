@@ -292,7 +292,7 @@ body {
                 </li>
                 <!-- ADDED GLOBAL Q&A CHAT LINK -->
                 <li class="nav-item">
-                    <a class="nav-link" href="chat.php">Global Q&A</a>
+                    <a class="nav-link" href="chat.php">Global Q&A <span id="qa-notification" class="badge bg-danger" style="display: none;">New</span></a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="comment.php">Leave Feedback</a>
@@ -401,6 +401,31 @@ body {
     </div>
     <?php endif; ?>
 </div>
+<script>
+// Function to check for new notifications
+function checkNotifications() {
+    fetch('check_notifications.php')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Notification check:', data);
+            if (data.success && data.has_notifications) {
+                document.getElementById('qa-notification').style.display = 'inline';
+                document.getElementById('qa-notification').textContent = data.count > 1 ? data.count : 'New';
+            } else {
+                document.getElementById('qa-notification').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error checking notifications:', error);
+        });
+}
+
+// Check for notifications on page load
+checkNotifications();
+
+// Check for notifications every 30 seconds
+setInterval(checkNotifications, 30000);
+</script>
 </body>
 </html>
 <script>

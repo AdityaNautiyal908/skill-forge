@@ -18,6 +18,23 @@ require_once "config/db_mongo.php";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkillForge — Global Q&A Chat</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Update last seen timestamp when page loads
+        $(document).ready(function() {
+            $.ajax({
+                url: 'update_last_seen.php',
+                type: 'POST',
+                dataType: 'json',
+                success: function(data) {
+                    console.log('Last seen timestamp updated');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error updating last seen timestamp:', error);
+                }
+            });
+        });
+    </script>
     <style>
         body { margin: 0; color: white; min-height: 100vh; background: linear-gradient(135deg, #171b30, #20254a 55%, #3c467b); }
         .navbar { background: rgba(0,0,0,0.35) !important; backdrop-filter: blur(10px); }
@@ -68,6 +85,18 @@ require_once "config/db_mongo.php";
     </div>
 
     <script>
+        // Update last seen timestamp when page loads
+        $(document).ready(function() {
+            $.ajax({
+                url: 'update_last_seen.php',
+                type: 'GET',
+                dataType: 'json',
+                error: function() {
+                    console.error('Failed to update last seen timestamp');
+                }
+            });
+        });
+        
         const chatBox = document.getElementById('chatBox');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
