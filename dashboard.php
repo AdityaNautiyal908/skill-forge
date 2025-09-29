@@ -1,10 +1,16 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])) {
+
+// We need to check for the session. However, we'll allow 'guest' to pass through.
+if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
+// Check if the user is a guest
+$is_guest = $_SESSION['user_id'] === 'guest';
+
+// The rest of your PHP logic can remain the same
 require_once "config/db_mongo.php";
 
 $coll = getCollection('coding_platform', 'problems');
@@ -167,7 +173,7 @@ body {
 .feature.f1 { --c1:#6d7cff; --c2:#7aa2ff; --c3:#a8b0ff; --glow: rgba(109,124,255,.45); }
 .feature.f2 { --c1:#ff7eb3; --c2:#ff758c; --c3:#ffd86f; --glow: rgba(255,126,179,.45); }
 .feature.f3 { --c1:#5efc8d; --c2:#3ecf8e; --c3:#9be15d; --glow: rgba(62,207,142,.45); }
-.feature.f4 { --c1:#ffd54f; --c2:#ffa726; --c3:#ff6f61; --glow: rgba(255,165,0,.45); }
+.feature.f4 { --c1:#ffd54f; --c2:#ffa726; --c3:#ff6f61; --glow: rgba(255,165,0,0.45); }
 .feature.f1:hover { border-color: rgba(109,124,255,0.45); }
 .feature.f2:hover { border-color: rgba(255,126,179,0.45); }
 .feature.f3:hover { border-color: rgba(62,207,142,0.45); }
@@ -270,36 +276,44 @@ body {
         <a class="navbar-brand" href="dashboard.php">SkillForge</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <span class="nav-link text-white">Hello, <?= $_SESSION['username'] ?><?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?> <span class="badge bg-warning text-dark">Admin</span><?php endif; ?></span>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="profile.php">Profile</a>
-                </li>
-                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                <li class="nav-item">
-                    <a class="nav-link" href="submissions.php">Submissions</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="users_admin.php">Users</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="admin_feedback.php">Feedback</a>
-                </li>
+                <?php if ($is_guest): ?>
+                    <li class="nav-item">
+                        <span class="nav-link text-white">Hello, <?= $_SESSION['username'] ?></span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.php">Login / Register</a>
+                    </li>
+                <?php else: ?>
+                    <li class="nav-item">
+                        <span class="nav-link text-white">Hello, <?= $_SESSION['username'] ?><?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?> <span class="badge bg-warning text-dark">Admin</span><?php endif; ?></span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="profile.php">Profile</a>
+                    </li>
+                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="submissions.php">Submissions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="users_admin.php">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin_feedback.php">Feedback</a>
+                    </li>
+                    <?php endif; ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="leaderboard.php">Leaderboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="chat.php">Global Q&A <span id="qa-notification" class="badge bg-danger" style="display: none;">New</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="comment.php">Leave Feedback</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="logout.php">Logout</a>
+                    </li>
                 <?php endif; ?>
-                <li class="nav-item">
-                    <a class="nav-link" href="leaderboard.php">Leaderboard</a>
-                </li>
-                <!-- ADDED GLOBAL Q&A CHAT LINK -->
-                <li class="nav-item">
-                    <a class="nav-link" href="chat.php">Global Q&A <span id="qa-notification" class="badge bg-danger" style="display: none;">New</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="comment.php">Leave Feedback</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="logout.php">Logout</a>
-                </li>
             </ul>
         </div>
     </div>
@@ -320,7 +334,6 @@ body {
             </div>
         <?php endforeach; ?>
 
-        <!-- MCQ Practice Card -->
         <?php if ($mcqCount > 0): $cls=$pal[$x%4]; ?>
             <div class="col-md-4 mb-3">
                 <div class="card shadow-sm h-100 feature <?= $cls ?>">
@@ -334,19 +347,16 @@ body {
         <?php endif; ?>
     </div>
     
-    <!-- Floating Comment Button -->
     <div class="floating-comment-btn">
         <a href="comment.php" class="btn btn-primary btn-animated" title="Leave Feedback">
             💬 Feedback
         </a>
     </div>
     
-    <!-- Comments Section -->
     <?php if (!empty($comments)): ?>
     <div class="mt-5">
         <h3 class="mb-4 heading">What Our Users Say</h3>
 
-        <!-- LTR carousel (cards source is hidden below) -->
         <div id="commentsCarousel" class="comments-carousel" aria-live="polite">
             <div class="track" id="commentsCarouselTrack"></div>
             <div class="controls" id="commentsCarouselControls" aria-label="Carousel controls">
@@ -356,7 +366,6 @@ body {
             </div>
         </div>
 
-        <!-- Hidden source with all cards (not shown, used to populate the carousel) -->
         <div id="commentsSource" style="display:none;">
             <div class="row">
             <?php foreach ($comments as $comment): 

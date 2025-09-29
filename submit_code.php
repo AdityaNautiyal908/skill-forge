@@ -1,17 +1,28 @@
 <?php
 session_start();
+require_once "config/db_mongo.php";
+
+// Check if a user is logged in.
+// If not, redirect them to the login page.
+// The `user_id` is set to 'guest' for guest users.
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
-
-require_once "config/db_mongo.php";
 
 // Get POST data
 $problem_id = $_POST['problem_id'] ?? null;
 $language   = $_POST['language'] ?? null;
 $code       = $_POST['code'] ?? '';
 
+// Check if the user is a guest and trying to submit code
+if ($_SESSION['user_id'] === 'guest') {
+    // Redirect guests to the login/registration page with a message
+    header("Location: login.php?prompt_register=true");
+    exit;
+}
+
+// Proceed with submission for registered users
 if (!$problem_id || !$language || !$code) {
     die("Missing required fields!");
 }
@@ -44,3 +55,4 @@ try {
 } catch (Exception $e) {
     die("Error storing submission: " . $e->getMessage());
 }
+?>

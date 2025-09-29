@@ -4,6 +4,15 @@ require_once "config/db_mysql.php";
 
 $message = "";
 
+// Check if the guest button was clicked
+if (isset($_POST['guest_login'])) {
+    $_SESSION['user_id'] = 'guest'; // Use a specific value to identify a guest user
+    $_SESSION['username'] = 'Guest';
+    $_SESSION['role'] = 'guest'; // Set a 'guest' role
+    header("Location: dashboard.php");
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
@@ -33,6 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
+
+// Check for the prompt_register parameter from the submit_code.php file
+$prompt_register = isset($_GET['prompt_register']) && $_GET['prompt_register'] === 'true';
 ?>
 
 <!DOCTYPE html>
@@ -84,6 +96,8 @@ body {
 .form-control { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; }
 .form-control:focus { background: rgba(255,255,255,0.12); color: #fff; border-color: #6d7cff; box-shadow: 0 0 0 0.2rem rgba(109,124,255,0.25); }
 .btn-primary-glow { background: linear-gradient(135deg, #6d7cff, #7aa2ff); border:none; width:100%; padding: 10px 16px; border-radius: 10px; box-shadow: 0 8px 30px rgba(109,124,255,0.35); }
+.btn-guest { background: none; border: 1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.88); padding: 10px 16px; width: 100%; border-radius: 10px; margin-top: 10px; }
+.btn-guest:hover { background: rgba(255,255,255,0.08); }
 .alt { color: rgba(255,255,255,0.88); }
 .alt a { color: #cfd8ff; text-decoration: none; }
 .alt a:hover { text-decoration: underline; }
@@ -111,6 +125,9 @@ body {
         <button type="submit" class="btn btn-primary-glow">Login</button>
         <p class="mt-3 text-center alt">Don't have an account? <a href="register.php">Create one</a></p>
     </form>
+    <form method="POST" action="" style="margin-top: 10px;">
+        <button type="submit" name="guest_login" class="btn btn-guest">Continue as Guest</button>
+    </form>
 </div>
 
 </body>
@@ -125,6 +142,18 @@ Swal.fire({
     background: '#3c467b',
     color: '#fff',
     confirmButtonColor: '#dc3545'
+});
+<?php endif; ?>
+
+// New SweetAlert2 message for guest users
+<?php if ($prompt_register): ?>
+Swal.fire({
+    icon: 'info',
+    title: 'Start Your Journey',
+    text: 'Please log in or create an account to submit your code and track your progress.',
+    background: '#3c467b',
+    color: '#fff',
+    confirmButtonColor: '#6d7cff'
 });
 <?php endif; ?>
 

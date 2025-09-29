@@ -5,6 +5,15 @@ require_once "config/db_mysql.php";
 $message = "";
 $success_message = "";
 
+// Check if the guest button was clicked
+if (isset($_POST['guest_register'])) {
+    $_SESSION['user_id'] = 'guest'; // Use the same guest identifier
+    $_SESSION['username'] = 'Guest';
+    $_SESSION['role'] = 'guest';
+    header("Location: dashboard.php");
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
@@ -150,6 +159,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .password-requirements li { color: #ccc; margin-bottom: 5px; }
         .password-requirements .valid::before { content: '✓ '; color: #28a745; }
         .password-requirements .invalid::before { content: '✗ '; color: #dc3545; }
+        
+        .btn-guest { background: none; border: 1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.88); padding: 10px 16px; width: 100%; border-radius: 10px; margin-top: 10px; }
+        .btn-guest:hover { background: rgba(255,255,255,0.08); }
     </style>
 </head>
 <body>
@@ -203,6 +215,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
             <button type="submit" class="btn btn-primary-glow" id="submitBtn">Create account</button>
             <p class="mt-3 text-center alt">Already have an account? <a href="login.php">Login</a></p>
+        </form>
+        <form method="POST" action="">
+            <button type="submit" name="guest_register" class="btn btn-guest">Continue as Guest</button>
         </form>
     </div>
 </div>
