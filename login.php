@@ -3,8 +3,8 @@ session_start();
 require_once "config/db_mysql.php";
 
 $message = "";
-$email = ""; // Initialize the email variable
-// This is the auto-login check. It should be at the very top of your file.
+$email = ""; 
+
 if (isset($_COOKIE['remember_user_id']) && !isset($_SESSION['user_id'])) {
     $user_id = $_COOKIE['remember_user_id'];
     $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
@@ -21,21 +21,20 @@ if (isset($_COOKIE['remember_user_id']) && !isset($_SESSION['user_id'])) {
         exit;
     }
 }
-// Check if the guest button was clicked
+
 if (isset($_POST['guest_login'])) {
-    $_SESSION['user_id'] = 'guest'; // Use a specific value to identify a guest user
+    $_SESSION['user_id'] = 'guest'; 
     $_SESSION['username'] = 'Guest';
-    $_SESSION['role'] = 'guest'; // Set a 'guest' role
+    $_SESSION['role'] = 'guest'; 
     header("Location: dashboard.php");
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = trim($_POST['email']); // Assign the submitted email here
+    $email = trim($_POST['email']); 
     $password = trim($_POST['password']);
     $remember_me = isset($_POST['remember_me']);
 
-    // Check for empty fields on the server-side as a security measure
     if (empty($email) || empty($password)) {
         $message = "Please enter both email and password.";
     } else {
@@ -51,9 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['role'] = isset($user['role']) ? $user['role'] : 'user';
 
-                // Set 'remember me' cookie if the checkbox was checked
                 if ($remember_me) {
-                    $expiry = time() + (86400 * 30); // 30 days
+                    $expiry = time() + (86400 * 30); 
                     setcookie('remember_user_id', $user['id'], $expiry, "/");
                 }
 
@@ -67,66 +65,65 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
-// Check for the prompt_register parameter from the submit_code.php file
 $prompt_register = isset($_GET['prompt_register']) && $_GET['prompt_register'] === 'true';
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SkillForge — Login</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<style>
-body {
-    margin: 0;
-    color: white;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(1200px 600px at 10% 10%, rgba(76,91,155,0.35), transparent 60%),
-                radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%),
-                linear-gradient(135deg, #171b30, #20254a 55%, #3c467b);
-    overflow: hidden;
-}
-.light { color:#2d3748 !important; background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%), linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0) !important; }
-.light .title, .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 { color: #1a202c !important; }
-.light .subtitle, .light p, .light .desc, .light .card-text { color: #4a5568 !important; }
-.stars { position: fixed; inset: 0; background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.7), transparent 60%), radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.55), transparent 60%), radial-gradient(1px 1px at 65% 25%, rgba(255,255,255,0.6), transparent 60%), radial-gradient(1px 1px at 80% 55%, rgba(255,255,255,0.45), transparent 60%); opacity: .45; pointer-events: none; }
-.web { position: fixed; inset:0; z-index:0; pointer-events:none; }
-.orb { position: absolute; border-radius: 50%; filter: blur(20px); opacity: .45; animation: float 12s ease-in-out infinite; }
-.o1{ width: 200px; height: 200px; background:#6d7cff; top:-60px; left:-60px; }
-.o2{ width: 260px; height: 260px; background:#7aa2ff; bottom:-80px; right:10%; animation-delay:2s; }
-@keyframes float { 0%,100%{ transform:translateY(0)} 50%{ transform:translateY(-14px)} }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SkillForge — Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+    body {
+        margin: 0;
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(1200px 600px at 10% 10%, rgba(76,91,155,0.35), transparent 60%),
+                    radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%),
+                    linear-gradient(135deg, #171b30, #20254a 55%, #3c467b);
+        overflow: hidden;
+    }
+    .light { color:#2d3748 !important; background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%), linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0) !important; }
+    .light .title, .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 { color: #1a202c !important; }
+    .light .subtitle, .light p, .light .desc, .light .card-text { color: #4a5568 !important; }
+    .stars { position: fixed; inset: 0; background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.7), transparent 60%), radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.55), transparent 60%), radial-gradient(1px 1px at 65% 25%, rgba(255,255,255,0.6), transparent 60%), radial-gradient(1px 1px at 80% 55%, rgba(255,255,255,0.45), transparent 60%); opacity: .45; pointer-events: none; }
+    .web { position: fixed; inset:0; z-index:0; pointer-events:none; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(20px); opacity: .45; animation: float 12s ease-in-out infinite; }
+    .o1{ width: 200px; height: 200px; background:#6d7cff; top:-60px; left:-60px; }
+    .o2{ width: 260px; height: 260px; background:#7aa2ff; bottom:-80px; right:10%; animation-delay:2s; }
+    @keyframes float { 0%,100%{ transform:translateY(0)} 50%{ transform:translateY(-14px)} }
 
-.auth-card {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 440px;
-    padding: 28px;
-    border-radius: 16px;
-    background: linear-gradient(180deg, rgba(60,70,123,0.42), rgba(60,70,123,0.18));
-    border: 1px solid rgba(255,255,255,0.14);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.45);
-}
-.brand { display:inline-block; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.14); background:rgba(60,70,123,0.35); font-weight:600; margin-bottom:10px; }
-.title { font-weight:800; margin:0 0 6px 0; }
-.subtitle { color: rgba(255,255,255,0.88); margin-bottom: 18px; }
-.form-label { color: rgba(255,255,255,0.9); }
-.form-control { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; }
-.form-control:focus { background: rgba(255,255,255,0.12); color: #fff; border-color: #6d7cff; box-shadow: 0 0 0 0.2rem rgba(109,124,255,0.25); }
-.btn-primary-glow { background: linear-gradient(135deg, #6d7cff, #7aa2ff); border:none; width:100%; padding: 10px 16px; border-radius: 10px; box-shadow: 0 8px 30px rgba(109,124,255,0.35); }
-.btn-guest { background: none; border: 1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.88); padding: 10px 16px; width: 100%; border-radius: 10px; margin-top: 10px; }
-.btn-guest:hover { background: rgba(255,255,255,0.08); }
-.alt { color: rgba(255,255,255,0.88); }
-.alt a { color: #cfd8ff; text-decoration: none; }
-.alt a:hover { text-decoration: underline; }
-.form-check { margin-top: -10px; margin-bottom: 18px; }
-</style>
+    .auth-card {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 440px;
+        padding: 28px;
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(60,70,123,0.42), rgba(60,70,123,0.18));
+        border: 1px solid rgba(255,255,255,0.14);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.45);
+    }
+    .brand { display:inline-block; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.14); background:rgba(60,70,123,0.35); font-weight:600; margin-bottom:10px; }
+    .title { font-weight:800; margin:0 0 6px 0; }
+    .subtitle { color: rgba(255,255,255,0.88); margin-bottom: 18px; }
+    .form-label { color: rgba(255,255,255,0.9); }
+    .form-control { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; }
+    .form-control:focus { background: rgba(255,255,255,0.12); color: #fff; border-color: #6d7cff; box-shadow: 0 0 0 0.2rem rgba(109,124,255,0.25); }
+    .btn-primary-glow { background: linear-gradient(135deg, #6d7cff, #7aa2ff); border:none; width:100%; padding: 10px 16px; border-radius: 10px; box-shadow: 0 8px 30px rgba(109,124,255,0.35); }
+    .btn-guest { background: none; border: 1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.88); padding: 10px 16px; width: 100%; border-radius: 10px; margin-top: 10px; }
+    .btn-guest:hover { background: rgba(255,255,255,0.08); }
+    .alt { color: rgba(255,255,255,0.88); }
+    .alt a { color: #cfd8ff; text-decoration: none; }
+    .alt a:hover { text-decoration: underline; }
+    .form-check { margin-top: -10px; margin-bottom: 18px; }
+    </style>
 </head>
 <body>
 <div class="stars"></div>
@@ -154,6 +151,9 @@ body {
             </label>
         </div>
         <button type="submit" class="btn btn-primary-glow">Login</button>
+        <p class="mt-3 text-center alt">
+            <a href="forgot_password.php">Forgot Password?</a>
+        </p>
         <p class="mt-3 text-center alt">Don't have an account? <a href="register.php">Create one</a></p>
     </form>
     <form method="POST" action="" style="margin-top: 10px;">
@@ -226,4 +226,3 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     document.body.appendChild(box); box.appendChild(tBtn); box.appendChild(aBtn);
 })();
 </script>
-
