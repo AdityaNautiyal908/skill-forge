@@ -237,6 +237,41 @@ body {
     box-shadow: 0 20px 46px rgba(0,0,0,.35);
 }
 
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: #222;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5px;
+    transition: background 0.3s ease;
+}
+.toggle-switch .knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+.toggle-switch .icon {
+    font-size: 14px;
+    z-index: 1;
+}
+.toggle-switch.active {
+    background: #ffd54f;
+}
+.toggle-switch.active .knob {
+    transform: translateX(24px);
+}
+
+
 /* Comment card hover effects with different color palettes */
 .comment-card.f1:hover { border-color: rgba(110,142,251,0.35); }
 .comment-card.f2:hover { border-color: rgba(255,126,179,0.35); }
@@ -271,11 +306,12 @@ body {
 <div class="orb o1"></div>
 <div class="orb o2"></div>
 
+<!-- Inside your <nav> ... -->
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
         <a class="navbar-brand" href="dashboard.php">SkillForge</a>
         <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto align-items-center">
                 <?php if ($is_guest): ?>
                     <li class="nav-item">
                         <span class="nav-link text-white">Hello, <?= $_SESSION['username'] ?></span>
@@ -285,39 +321,47 @@ body {
                     </li>
                 <?php else: ?>
                     <li class="nav-item">
-                        <span class="nav-link text-white">Hello, <?= $_SESSION['username'] ?><?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?> <span class="badge bg-warning text-dark">Admin</span><?php endif; ?></span>
+                        <span class="nav-link text-white">
+                            Hello, <?= $_SESSION['username'] ?>
+                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                <span class="badge bg-warning text-dark">Admin</span>
+                            <?php endif; ?>
+                        </span>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="profile.php">Profile</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="profile.php">Profile</a></li>
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="submissions.php">Submissions</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="users_admin.php">Users</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="admin_feedback.php">Feedback</a>
-                    </li>
+                        <li class="nav-item"><a class="nav-link" href="submissions.php">Submissions</a></li>
+                        <li class="nav-item"><a class="nav-link" href="users_admin.php">Users</a></li>
+                        <li class="nav-item"><a class="nav-link" href="admin_feedback.php">Feedback</a></li>
                     <?php endif; ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="leaderboard.php">Leaderboard</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="leaderboard.php">Leaderboard</a></li>
                     <li class="nav-item">
                         <a class="nav-link" href="chat.php">Global Q&A <span id="qa-notification" class="badge bg-danger" style="display: none;">New</span></a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="comment.php">Leave Feedback</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="logout.php">Logout</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="comment.php">Leave Feedback</a></li>
+                    <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
                 <?php endif; ?>
+
+                <!-- Toggle buttons -->
+                <li class="nav-item ms-3">
+                    <div class="toggle-switch" id="themeToggle">
+                        <div class="knob"></div>
+                        <span class="icon sun">☀️</span>
+                        <span class="icon moon">🌙</span>
+                    </div>
+                </li>
+                <li class="nav-item ms-3">
+                    <div class="toggle-switch" id="animToggle">
+                        <div class="knob"></div>
+                        <span class="icon on">✨</span>
+                        <span class="icon off">🚫</span>
+                    </div>
+                </li>
             </ul>
         </div>
     </div>
 </nav>
+
 
 <div class="container mt-5 section">
     <h2 class="mb-4 heading">Choose a Language to Practice</h2>
@@ -686,6 +730,35 @@ function playNotificationSound() {
         card.addEventListener('mouseenter', function(){
             card.style.transition = 'transform .08s ease';
         });
+    });
+})();
+</script>
+
+<script>
+(function(){
+    function apply(){
+        const theme = localStorage.getItem('sf_theme') || 'dark';
+        const anim = localStorage.getItem('sf_anim') || 'on';
+        document.body.classList.toggle('light', theme==='light');
+        document.body.classList.toggle('no-anim', anim==='off');
+        document.getElementById('themeToggle').classList.toggle('active', theme==='light');
+        document.getElementById('animToggle').classList.toggle('active', anim==='on');
+    }
+
+    apply();
+
+    document.getElementById('themeToggle').addEventListener('click', function(){
+        const cur = localStorage.getItem('sf_theme') || 'dark';
+        const next = cur === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('sf_theme', next);
+        apply();
+    });
+
+    document.getElementById('animToggle').addEventListener('click', function(){
+        const cur = localStorage.getItem('sf_anim') || 'on';
+        const next = cur === 'on' ? 'off' : 'on';
+        localStorage.setItem('sf_anim', next);
+        apply();
     });
 })();
 </script>
