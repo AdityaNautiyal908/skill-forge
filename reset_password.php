@@ -152,10 +152,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $is_valid_token) {
     
     <script>
         // SweetAlert for status messages
-        <?php if ($message): ?>
+        <?php if ($message): 
+            // Determine icon based on message content
+            $icon = 'info'; // Default for invalid/expired token messages
+            $title = 'Request Status';
+
+            if (strpos($message, 'Success!') !== false) {
+                $icon = 'success'; // Use green checkmark for successful reset
+                $title = 'Password Reset Complete'; 
+            } elseif (strpos($message, 'error:') !== false || strpos($message, 'match') !== false) {
+                $icon = 'error'; // Use red X for validation or database errors
+                $title = 'Reset Failed';
+            }
+        ?>
         Swal.fire({
-            icon: '<?= ($is_valid_token || strpos($message, 'Success') !== false) ? 'info' : 'error' ?>',
-            title: 'Request Status',
+            icon: '<?= $icon ?>',
+            title: '<?= $title ?>',
             text: '<?= htmlspecialchars($message) ?>',
             background: '#3c467b',
             color: '#fff',

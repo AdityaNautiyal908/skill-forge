@@ -1,9 +1,18 @@
 <?php
 session_start();
 require_once "config/db_mysql.php";
+require_once "includes/mailer.php"; // You'll need a mailer class or function
 
 $message = "";
 $success_message = "";
+
+// --- 1. CHECK FOR SESSION SUCCESS MESSAGE (FLASH MESSAGE) ---
+if (isset($_SESSION['registration_success'])) {
+    $success_message = $_SESSION['registration_success'];
+    // Clear the message immediately so it only shows once
+    unset($_SESSION['registration_success']); 
+}
+// -----------------------------------------------------------
 
 // Check if the guest button was clicked
 if (isset($_POST['guest_register'])) {
@@ -49,10 +58,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Insert user
             $stmt = $conn->prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)");
             $stmt->bind_param("sss", $username, $email, $password_hash);
+            
             if ($stmt->execute()) {
+                // --- NEW WELCOME EMAIL LOGIC ---
+                $welcome_subject = "Welcome to SkillForge, " . $username . "!";
+                $welcome_body = "
+                    <h2>Welcome to SkillForge!</h2>
+                    <p>Hello **" . htmlspecialchars($username) . "**,</p>
+                    <p>Thank you for signing up and starting your coding journey with us. Your account is now active.</p>
+                    <p>You can start practicing immediately by visiting your dashboard:</p>
+                    <p><a href='http://" . $_SERVER['HTTP_HOST'] . "/skill-forge/dashboard.php' style='padding: 10px 20px; background-color: #6d7cff; color: white; text-decoration: none; border-radius: 5px; display: inline-block;'>Go to Dashboard</a></p>
+                    <p>Happy Coding!</p>
+                    <p>— The SkillForge Team</p>
+                ";
+                
+                // Send the welcome email
+                send_mail($email, $welcome_subject, $welcome_body);
+
+                // --- 2. SET THE SESSION FLASH MESSAGE BEFORE REDIRECT ---
+                $_SESSION['registration_success'] = "Your work has been saved"; // Set the desired message
+                
+                // Set session and redirect
                 $_SESSION['user_id'] = $stmt->insert_id;
                 $_SESSION['username'] = $username;
-                $_SESSION['success_message'] = "Signed in successfully"; // Updated message
                 header("Location: dashboard.php");
                 exit;
             } else {
@@ -72,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        /* (CSS styles are kept here, unchanged) */
         /* Main Layout Adjustments for Horizontal View */
         body { 
             margin:0; color:white; min-height:100vh; display:flex; align-items:center; justify-content:center;
@@ -151,7 +180,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .password-input-wrapper { position: relative; display: flex; align-items: center; }
         .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: rgba(255,255,255,0.85); cursor: pointer; padding: 4px; border-radius: 4px; transition: color 0.2s ease, background 0.2s ease; z-index: 10; }
         .password-toggle:hover { color: rgba(255,255,255,1); background: rgba(255,255,255,0.12); }
-        .password-toggle .eye-svg { width: 22px; height: 22px; display: inline-block; background-repeat: no-repeat; background-position: center; background-size: 22px 22px; filter: drop-shadow(0 0 0 rgba(0,0,0,0)); transition: transform .2s ease, opacity .2s ease; }
         .password-toggle.active .eye-svg { transform: scale(1.05); }
         .password-input-wrapper .form-control { padding-right: 45px; }
 
@@ -238,6 +266,23 @@ Swal.fire({
     confirmButtonColor: '#6d7cff'
 });
 <?php endif; ?>
+
+// --- NEW SUCCESS MESSAGE DISPLAY ---
+<?php if ($success_message): ?>
+Swal.fire({
+    icon: 'success', // Use success icon for the green checkmark
+    title: 'Registration Complete',
+    text: '<?= htmlspecialchars($success_message) ?>',
+    showConfirmButton: false, // Optional: You might want to remove the button to close automatically
+    timer: 2500, // Close after 2.5 seconds
+    background: '#3c467b',
+    color: '#fff',
+    customClass: {
+        popup: 'swal2-dark-mode', // You can define custom styling for the dark mode
+    }
+});
+<?php endif; ?>
+// -------------------------------------
 
 // Password strength and validation
 (function(){
