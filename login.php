@@ -3,7 +3,7 @@ session_start();
 require_once "config/db_mysql.php";
 
 $message = "";
-
+$email = ""; // Initialize the email variable
 // This is the auto-login check. It should be at the very top of your file.
 if (isset($_COOKIE['remember_user_id']) && !isset($_SESSION['user_id'])) {
     $user_id = $_COOKIE['remember_user_id'];
@@ -31,7 +31,7 @@ if (isset($_POST['guest_login'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = trim($_POST['email']);
+    $email = trim($_POST['email']); // Assign the submitted email here
     $password = trim($_POST['password']);
     $remember_me = isset($_POST['remember_me']);
 
@@ -67,7 +67,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
-
 // Check for the prompt_register parameter from the submit_code.php file
 $prompt_register = isset($_GET['prompt_register']) && $_GET['prompt_register'] === 'true';
 ?>
@@ -142,7 +141,7 @@ body {
     <form method="POST" action="" id="loginForm" novalidate>
         <div class="mb-3">
             <label class="form-label">Email</label>
-            <input type="email" name="email" id="email" class="form-control" autocomplete="username" required>
+            <input type="email" name="email" id="email" class="form-control" autocomplete="username" value="<?= htmlspecialchars($email) ?>" required>
         </div>
         <div class="mb-3">
             <label class="form-label">Password</label>
