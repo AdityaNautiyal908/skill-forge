@@ -138,7 +138,7 @@ $prompt_register = isset($_GET['prompt_register']) && $_GET['prompt_register'] =
     <form method="POST" action="" id="loginForm" novalidate>
         <div class="mb-3">
             <label class="form-label">Email</label>
-            <input type="email" name="email" id="email" class="form-control" autocomplete="username" value="<?= htmlspecialchars($email) ?>" required>
+            <input type="email" name="email" id="email" class="form-control" autocomplete="username" autofocus value="<?= htmlspecialchars($email) ?>" required>
         </div>
         <div class="mb-3">
             <label class="form-label">Password</label>
