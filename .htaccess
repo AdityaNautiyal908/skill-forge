@@ -1,0 +1,2 @@
+# Custom 404 Error Page
+ErrorDocument 404 /skill-forge/404.php

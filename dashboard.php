@@ -54,14 +54,36 @@ foreach ($languages as $lang) {
     $problems_count[$lang] = $count;
 }
 
+// --- NEW FUNCTIONALITY LOGIC ---
+
 // MCQ count (distinct category optional later). If collection exists, count all docs
 $mcqCount = 0;
 try {
+    // Assuming a 'mcq' collection exists in your MongoDB database
     $mcqQuery = new MongoDB\Driver\Query([]);
     $mcqCount = count($coll['manager']->executeQuery($coll['db'] . ".mcq", $mcqQuery)->toArray());
 } catch (Throwable $e) {
     $mcqCount = 0;
 }
+
+// Two-Player Challenge Logic (MCQ-based)
+// You might have a specific category of MCQs for challenge, or just use the total count.
+// For now, let's assume we can pull from the main MCQ pool.
+$twoPlayerCount = $mcqCount; // Use total MCQ count for questions available
+
+// If you decide to use a separate collection for competitive MCQs:
+/*
+try {
+    $challengeColl = getCollection('coding_platform', 'challenge_mcq');
+    $challengeQuery = new MongoDB\Driver\Query([]);
+    $twoPlayerCount = count($challengeColl['manager']->executeQuery($challengeColl['db'] . ".challenge_mcq", $challengeQuery)->toArray());
+} catch (Throwable $e) {
+    $twoPlayerCount = 0;
+}
+*/
+
+
+// --- END NEW FUNCTIONALITY LOGIC ---
 
 // Fetch recent comments for display (excluding deleted ones)
 $comments = [];
@@ -97,6 +119,7 @@ try {
 <title>SkillForge — Dashboard</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
+/* Existing CSS styles remain here, no changes needed for this part */
 body {
     margin: 0;
     color: white;
@@ -306,7 +329,6 @@ body {
 <div class="orb o1"></div>
 <div class="orb o2"></div>
 
-<!-- Inside your <nav> ... -->
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
         <a class="navbar-brand" href="dashboard.php">SkillForge</a>
@@ -342,7 +364,6 @@ body {
                     <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
                 <?php endif; ?>
 
-                <!-- Toggle buttons -->
                 <li class="nav-item ms-3">
                     <div class="toggle-switch" id="themeToggle">
                         <div class="knob"></div>
@@ -378,7 +399,7 @@ body {
             </div>
         <?php endforeach; ?>
 
-        <?php if ($mcqCount > 0): $cls=$pal[$x%4]; ?>
+        <?php if ($mcqCount > 0): $cls=$pal[$x%4]; $x++; ?>
             <div class="col-md-4 mb-3">
                 <div class="card shadow-sm h-100 feature <?= $cls ?>">
                     <div class="card-body">
@@ -389,7 +410,19 @@ body {
                 </div>
             </div>
         <?php endif; ?>
-    </div>
+        
+        <?php if ($twoPlayerCount > 0): $cls=$pal[$x%4]; $x++; ?>
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm h-100 feature f2"> 
+                    <div class="card-body">
+                        <h5 class="card-title mb-1">🔥 Two-Player Quiz Battle</h5>
+                        <p class="card-text mb-3"><?= $twoPlayerCount ?> potential questions for battle</p>
+                        <a href="challenge.php" class="btn btn-primary btn-animated">Start Challenge</a>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+        </div>
     
     <div class="floating-comment-btn">
         <a href="comment.php" class="btn btn-primary btn-animated" title="Leave Feedback">
@@ -551,7 +584,7 @@ function playNotificationSound() {
     var aBtn=mk((localStorage.getItem('sf_anim')||'on')==='off'?'Enable Anim':'Disable Anim');
     tBtn.onclick=function(){ var cur=localStorage.getItem('sf_theme')||'dark'; var next=cur==='dark'?'light':'dark'; localStorage.setItem('sf_theme',next); tBtn.textContent=next==='light'?'Dark Mode':'Light Mode'; apply(); };
     aBtn.onclick=function(){ var cur=localStorage.getItem('sf_anim')||'on'; var next=cur==='on'?'off':'on'; localStorage.setItem('sf_anim',next); aBtn.textContent=next==='off'?'Enable Anim':'Disable Anim'; apply(); };
-    box.appendChild(tBtn); box.appendChild(aBtn); document.body.appendChild(box);
+    box.appendChild(tBtn); box.appendChild(aBtn); // document.body.appendChild(box); // Commenting out the old floating toggles
 })();
 </script>
 <script>
@@ -657,7 +690,7 @@ function playNotificationSound() {
     function setTransform(card, xRatio, yRatio){
         // xRatio and yRatio are in [-0.5, 0.5]
         var rotateX = (yRatio * -2) * maxTilt; // move up => tilt back
-        var rotateY = (xRatio * 2) * maxTilt;  // move right => tilt right
+        var rotateY = (xRatio * 2) * maxTilt;  // move right => tilt right
         card.style.transform = 'perspective(800px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
     }
 
@@ -665,7 +698,7 @@ function playNotificationSound() {
         var card = e.currentTarget;
         var rect = card.getBoundingClientRect();
         var x = (e.clientX - rect.left) / Math.max(1, rect.width) - 0.5; // -0.5..0.5
-        var y = (e.clientY - rect.top) / Math.max(1, rect.height) - 0.5;  // -0.5..0.5
+        var y = (e.clientY - rect.top) / Math.max(1, rect.height) - 0.5;  // -0.5..0.5
         setTransform(card, x, y);
         // Spotlight gradient following cursor
         var px = (x + 0.5) * 100; // 0..100
@@ -700,7 +733,7 @@ function playNotificationSound() {
     function setTransform(card, xRatio, yRatio){
         // xRatio and yRatio are in [-0.5, 0.5]
         var rotateX = (yRatio * -2) * maxTilt; // move up => tilt back
-        var rotateY = (xRatio * 2) * maxTilt;  // move right => tilt right
+        var rotateY = (xRatio * 2) * maxTilt;  // move right => tilt right
         card.style.transform = 'perspective(800px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
     }
 
@@ -708,7 +741,7 @@ function playNotificationSound() {
         var card = e.currentTarget;
         var rect = card.getBoundingClientRect();
         var x = (e.clientX - rect.left) / Math.max(1, rect.width) - 0.5; // -0.5..0.5
-        var y = (e.clientY - rect.top) / Math.max(1, rect.height) - 0.5;  // -0.5..0.5
+        var y = (e.clientY - rect.top) / Math.max(1, rect.height) - 0.5;  // -0.5..0.5
         setTransform(card, x, y);
         // Spotlight gradient following cursor
         var px = (x + 0.5) * 100; // 0..100
