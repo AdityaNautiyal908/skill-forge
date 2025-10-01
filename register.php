@@ -4,14 +4,10 @@ require_once "config/db_mysql.php";
 require_once "includes/mailer.php"; // You'll need a mailer class or function
 
 $message = "";
-$success_message = "";
+// Removed: $success_message = "";
 
 // --- 1. CHECK FOR SESSION SUCCESS MESSAGE (FLASH MESSAGE) ---
-if (isset($_SESSION['registration_success'])) {
-    $success_message = $_SESSION['registration_success'];
-    // Clear the message immediately so it only shows once
-    unset($_SESSION['registration_success']); 
-}
+// Removed: Logic for checking and clearing $_SESSION['registration_success'] is no longer needed here.
 // -----------------------------------------------------------
 
 // Check if the guest button was clicked
@@ -75,13 +71,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Send the welcome email
                 send_mail($email, $welcome_subject, $welcome_body);
 
-                // --- 2. SET THE SESSION FLASH MESSAGE BEFORE REDIRECT ---
-                $_SESSION['registration_success'] = "Your work has been saved"; // Set the desired message
-                
-                // Set session and redirect
+                // --- REDIRECT TO LOADING PAGE (PRELOADER) ---
                 $_SESSION['user_id'] = $stmt->insert_id;
                 $_SESSION['username'] = $username;
-                header("Location: dashboard.php");
+                $_SESSION['show_preloader'] = true; // Signal the loading page
+                header("Location: loading.php");
                 exit;
             } else {
                 $message = "Registration failed. Try again!";
@@ -266,23 +260,6 @@ Swal.fire({
     confirmButtonColor: '#6d7cff'
 });
 <?php endif; ?>
-
-// --- NEW SUCCESS MESSAGE DISPLAY ---
-<?php if ($success_message): ?>
-Swal.fire({
-    icon: 'success', // Use success icon for the green checkmark
-    title: 'Registration Complete',
-    text: '<?= htmlspecialchars($success_message) ?>',
-    showConfirmButton: false, // Optional: You might want to remove the button to close automatically
-    timer: 2500, // Close after 2.5 seconds
-    background: '#3c467b',
-    color: '#fff',
-    customClass: {
-        popup: 'swal2-dark-mode', // You can define custom styling for the dark mode
-    }
-});
-<?php endif; ?>
-// -------------------------------------
 
 // Password strength and validation
 (function(){

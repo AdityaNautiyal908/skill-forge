@@ -5,6 +5,7 @@ require_once "config/db_mysql.php";
 $message = "";
 $email = ""; 
 
+// --- PHP: "Remember Me" Login Logic ---
 if (isset($_COOKIE['remember_user_id']) && !isset($_SESSION['user_id'])) {
     $user_id = $_COOKIE['remember_user_id'];
     $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
@@ -17,19 +18,26 @@ if (isset($_COOKIE['remember_user_id']) && !isset($_SESSION['user_id'])) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['role'] = isset($user['role']) ? $user['role'] : 'user';
-        header("Location: dashboard.php");
+        
+        // Redirect to loading page after "remember me" login
+        $_SESSION['show_preloader'] = true;
+        header("Location: loading.php");
         exit;
     }
 }
 
+// --- PHP: Guest Login Logic ---
 if (isset($_POST['guest_login'])) {
     $_SESSION['user_id'] = 'guest'; 
     $_SESSION['username'] = 'Guest';
     $_SESSION['role'] = 'guest'; 
+    
+    // Redirect to dashboard (no animation needed for instant guest access)
     header("Location: dashboard.php");
     exit;
 }
 
+// --- PHP: Form Submission Login Logic ---
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = trim($_POST['email']); 
     $password = trim($_POST['password']);
@@ -46,6 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($result->num_rows == 1) {
             $user = $result->fetch_assoc();
             if (password_verify($password, $user['password_hash'])) {
+                
+                // *** SUCCESSFUL LOGIN: SET SESSION AND REDIRECT TO LOADER ***
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['role'] = isset($user['role']) ? $user['role'] : 'user';
@@ -54,9 +64,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $expiry = time() + (86400 * 30); 
                     setcookie('remember_user_id', $user['id'], $expiry, "/");
                 }
-
-                header("Location: dashboard.php");
+                
+                // NEW: Set preloader flag and redirect to loading page
+                $_SESSION['show_preloader'] = true;
+                header("Location: loading.php");
                 exit;
+                
             } else {
                 $message = "Incorrect password!";
             }
@@ -85,8 +98,8 @@ $prompt_register = isset($_GET['prompt_register']) && $_GET['prompt_register'] =
         align-items: center;
         justify-content: center;
         background: radial-gradient(1200px 600px at 10% 10%, rgba(76,91,155,0.35), transparent 60%),
-                    radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%),
-                    linear-gradient(135deg, #171b30, #20254a 55%, #3c467b);
+                     radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%),
+                     linear-gradient(135deg, #171b30, #20254a 55%, #3c467b);
         overflow: hidden;
     }
     .light { color:#2d3748 !important; background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%), linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0) !important; }
