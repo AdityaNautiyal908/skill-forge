@@ -355,6 +355,7 @@ body {
                         <li class="nav-item"><a class="nav-link" href="submissions.php">Submissions</a></li>
                         <li class="nav-item"><a class="nav-link" href="users_admin.php">Users</a></li>
                         <li class="nav-item"><a class="nav-link" href="admin_feedback.php">Feedback</a></li>
+                        <li class="nav-item"><a class="nav-link" href="admin_mail.php">Send Mail</a></li>
                     <?php endif; ?>
                     <li class="nav-item"><a class="nav-link" href="leaderboard.php">Leaderboard</a></li>
                     <li class="nav-item">

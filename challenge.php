@@ -31,7 +31,6 @@ try {
     }
     
     // 3. Shuffle the entire set and select the required number of questions (TOTAL_QUESTIONS = 20)
-    // This ensures randomization every time the page loads.
     shuffle($mcqData);
     $mcqData = array_slice($mcqData, 0, $totalQuestions);
 
@@ -72,16 +71,22 @@ $jsonMcqData = json_encode($mcqData);
             margin-bottom: 30px;
             text-align: left;
         }
+        
+        /* --- NEW ANIMATED BACK LINK STYLES --- */
         .back-link {
             color: #7aa2ff; /* Light blue color from your primary button gradient */
-            text-decoration: none;
+            text-decoration: none; /* REMOVED UNDERLINE */
             font-size: 1.1em;
-            transition: color 0.2s;
+            display: inline-block;
+            transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
         }
         .back-link:hover {
-            color: #a8b0ff;
-            text-decoration: underline;
+            color: #fff; /* White text on hover */
+            text-shadow: 0 0 8px rgba(122, 162, 255, 0.8); /* Subtle glow effect */
+            transform: translateX(-2px); /* Slight shift to the left */
         }
+        /* --- END NEW BACK LINK STYLES --- */
+
 
         .container { 
             background: rgba(60,70,123,0.25);
