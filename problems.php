@@ -85,7 +85,7 @@ if (isset($_GET['msg'])) $successMessage = $_GET['msg'];
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.1/ace.js" crossorigin="anonymous"></script>
 <style>
-/* ... (Existing styles remain the same until the toggle section) ... */
+/* ... (Existing styles remain the same) ... */
 body {
     margin: 0;
     color: white;
@@ -124,32 +124,73 @@ body {
 @keyframes ripple { to { transform: scale(10); opacity: 0; } }
 .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: white; }
 
-/* FIX: Updated style for the toggle buttons container and button */
-.toggle-buttons {
-    display: flex;
-    gap: 8px; /* Space between buttons */
-    flex-shrink: 0;
-    align-items: flex-end; /* Anchor them to the bottom of the flex container */
-}
-.toggle-btn {
-    /* ONLY include custom background/border, let Bootstrap handle size/padding */
-    border: 1px solid rgba(255,255,255,0.4); 
-    background: rgba(0,0,0,0.35); 
-    color: #fff; 
-    border-radius: 10px; 
-    backdrop-filter: blur(6px);
-    cursor: pointer;
-    text-decoration: none;
-    box-shadow: none;
-    /* IMPORTANT: Remove the conflicting padding property that was in the original code */
-    /* padding: 8px 12px; <-- REMOVED THIS */
-}
 #editor { height: 420px; width: 100%; border: 1px solid rgba(255,255,255,0.18); border-radius: 12px; background:#1e1f2a; }
 .progress { height: 10px; background: rgba(255,255,255,0.12); }
 .progress-bar { background: linear-gradient(135deg, #36d1dc, #5b86e5); }
 @media (max-width: 576px){
     #editor { height: 300px; }
 }
+
+/* --- NEW/MODIFIED: Navbar Toggle Button Styles --- */
+.nav-toggles {
+    display: flex;
+    gap: 12px;
+}
+.toggle-btn-nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 64px; /* Width to hold two icons */
+    height: 32px; /* Height of the button */
+    padding: 4px;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background .3s ease;
+}
+.toggle-btn-nav:hover {
+    background: rgba(0,0,0,0.5);
+}
+.toggle-btn-nav .icon-wrapper {
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+    display: grid;
+    place-items: center;
+    z-index: 1; /* Keep icons above the pseudo-element */
+    transition: color 0.3s ease;
+}
+/* The sliding circle background */
+.toggle-btn-nav::before {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    top: 3px;
+    left: 4px;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Theme Toggle States */
+#themeToggleBtn .icon-sun { color: #333; } /* Active by default */
+#themeToggleBtn .icon-moon { color: #fff; } /* Inactive by default */
+
+#themeToggleBtn.dark-active::before { transform: translateX(calc(100% + 6px)); }
+#themeToggleBtn.dark-active .icon-sun { color: #fff; }
+#themeToggleBtn.dark-active .icon-moon { color: #333; }
+
+/* Animation Toggle States */
+#animToggleBtn .icon-on { color: #333; }
+#animToggleBtn .icon-off { color: #fff; }
+
+#animToggleBtn.anim-off-active::before { transform: translateX(calc(100% + 6px)); }
+#animToggleBtn.anim-off-active .icon-on { color: #fff; }
+#animToggleBtn.anim-off-active .icon-off { color: #333; }
+
 </style>
 </head>
 <body>
@@ -162,7 +203,21 @@ body {
     <div class="container">
         <a class="navbar-brand" href="dashboard.php">SkillForge</a>
         <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto align-items-center">
+
+                <li class="nav-item me-3">
+                    <div class="nav-toggles">
+                        <button id="themeToggleBtn" class="toggle-btn-nav" title="Toggle Theme">
+                            <span class="icon-wrapper icon-sun">☀️</span>
+                            <span class="icon-wrapper icon-moon">🌙</span>
+                        </button>
+                        <button id="animToggleBtn" class="toggle-btn-nav" title="Toggle Animations">
+                            <span class="icon-wrapper icon-on">✨</span>
+                            <span class="icon-wrapper icon-off">🚫</span>
+                        </button>
+                    </div>
+                </li>
+
                 <li class="nav-item">
                     <span class="nav-link text-white">Hello, <?= htmlspecialchars($username) ?></span>
                 </li>
@@ -224,12 +279,8 @@ body {
         <?php else: ?><div></div><?php endif; ?>
         
         <div class="d-flex align-items-end">
-            <div class="toggle-buttons me-3">
-                <button id="themeToggleBtn" class="btn btn-outline btn-sm toggle-btn"></button>
-                <button id="animToggleBtn" class="btn btn-outline btn-sm toggle-btn"></button>
-            </div>
             <?php if ($index < count($allProblems)-1): ?>
-            <a href="problems.php?language=<?= $language ?>&index=<?= $index+1 ?>" class="btn btn-primary nav-problem">Next &raquo;</a>
+            <a href="problems.php?language=<?= $language ?>&index=<?= $index+1 ?>" class="btn btn-outline nav-problem">Next &raquo;</a>
             <?php endif; ?>
         </div>
     </div>
@@ -284,7 +335,7 @@ window.addEventListener('beforeunload', function (e) {
     var nodes=[], NUM=45, K=4; for(var i=0;i<NUM;i++){ nodes.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*0.15*DPR,vy:(Math.random()-0.5)*0.15*DPR,p:Math.random()*1e3}); }
     function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(var i=0;i<nodes.length;i++){ var a=nodes[i]; ctx.fillStyle='rgba(255,255,255,0.02)'; ctx.beginPath(); ctx.arc(a.x,a.y,2*DPR,0,Math.PI*2); ctx.fill(); var near=[]; for(var j=0;j<nodes.length;j++) if(j!==i){var b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy; near.push({j:j,d:d});} near.sort(function(p,q){return p.d-q.d;}); for(var k=0;k<K;k++){ var idx=near[k]&&near[k].j; if(idx==null) continue; var b=nodes[idx],dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy),alpha=Math.max(0,1-dist/(180*DPR)); if(alpha<=0) continue; var isLight=document.body.classList.contains('light'); ctx.strokeStyle=isLight?('rgba(255,203,0,'+(0.16*alpha)+')'):'rgba(160,190,255,'+(0.12*alpha)+')'; ctx.lineWidth=1*DPR; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); var t=(Date.now()+a.p)%1200/1200; var px=a.x+(b.x-a.x)*t, py=a.y+(b.y-a.y)*t; var grad=ctx.createRadialGradient(px,py,0,px,py,10*DPR); if(isLight){ grad.addColorStop(0,'rgba(255,220,120,'+(0.45*alpha)+')'); grad.addColorStop(1,'rgba(255,220,120,0)'); } else { grad.addColorStop(0,'rgba(120,220,255,'+(0.35*alpha)+')'); grad.addColorStop(1,'rgba(120,220,255,0)'); } ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(px,py,10*DPR,0,Math.PI*2); ctx.fill(); }} for(var i=0;i<nodes.length;i++){ var n=nodes[i]; n.x+=n.vx; n.y+=n.vy; if(n.x<0||n.x>canvas.width) n.vx*=-1; if(n.y<0||n.y>canvas.height) n.vy*=-1;} requestAnimationFrame(loop);} loop();})();
 
-// --- NEW/MODIFIED JAVASCRIPT FOR TOGGLES ---
+// --- MODIFIED JAVASCRIPT FOR TOGGLES ---
 (function(){
     var themeBtn = document.getElementById('themeToggleBtn');
     var animBtn = document.getElementById('animToggleBtn');
@@ -292,12 +343,17 @@ window.addEventListener('beforeunload', function (e) {
     function applyToggles(){ 
         var theme = localStorage.getItem('sf_theme') || 'dark'; 
         var anim = localStorage.getItem('sf_anim') || 'on'; 
+        
         document.body.classList.toggle('light', theme === 'light'); 
         document.body.classList.toggle('no-anim', anim === 'off');
         
-        // Update button text
-        if (themeBtn) themeBtn.textContent = theme === 'light' ? 'Dark Mode' : 'Light Mode';
-        if (animBtn) animBtn.textContent = anim === 'off' ? 'Enable Anim' : 'Disable Anim';
+        // Update button classes instead of text
+        if (themeBtn) {
+            themeBtn.classList.toggle('dark-active', theme === 'dark');
+        }
+        if (animBtn) {
+            animBtn.classList.toggle('anim-off-active', anim === 'off');
+        }
     }
     
     applyToggles();
