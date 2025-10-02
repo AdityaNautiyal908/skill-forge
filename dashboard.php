@@ -83,8 +83,6 @@ try {
 */
 
 
-// --- END NEW FUNCTIONALITY LOGIC ---
-
 // Fetch recent comments for display (excluding deleted ones)
 $comments = [];
 try {
@@ -106,8 +104,6 @@ try {
     }, $commentsResult);
 } catch (Throwable $e) {
     $comments = [];
-    // Debug: Uncomment the line below to see error details
-    // error_log("Comments fetch error: " . $e->getMessage());
 }
 ?>
 

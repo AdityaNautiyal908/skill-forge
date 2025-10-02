@@ -3,12 +3,14 @@ session_start();
 require_once "config/db_mysql.php";
 require_once "includes/mailer.php"; // You'll need a mailer class or function
 
-$message = "";
-// Removed: $success_message = "";
+// --- 1. CHECK FOR REGISTRATION SUCCESS (FLASH MESSAGE) ---
+$show_success_alert = false;
+if (isset($_SESSION['registration_success'])) {
+    $show_success_alert = true;
+    unset($_SESSION['registration_success']); // Unset it so it doesn't show again on refresh
+}
 
-// --- 1. CHECK FOR SESSION SUCCESS MESSAGE (FLASH MESSAGE) ---
-// Removed: Logic for checking and clearing $_SESSION['registration_success'] is no longer needed here.
-// -----------------------------------------------------------
+$message = "";
 
 // Check if the guest button was clicked
 if (isset($_POST['guest_register'])) {
@@ -71,12 +73,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Send the welcome email
                 send_mail($email, $welcome_subject, $welcome_body);
 
-                // --- REDIRECT TO LOADING PAGE (PRELOADER) ---
+                // --- 2. SET SESSION FOR SUCCESS ALERT AND REDIRECT ---
                 $_SESSION['user_id'] = $stmt->insert_id;
                 $_SESSION['username'] = $username;
-                $_SESSION['show_preloader'] = true; // Signal the loading page
-                header("Location: loading.php");
+                $_SESSION['show_preloader'] = true; // For the loading page
+                $_SESSION['registration_success'] = true; // Our new flash message trigger
+                header("Location: " . $_SERVER['PHP_SELF']); // Redirect back to this same page
                 exit;
+
             } else {
                 $message = "Registration failed. Try again!";
             }
@@ -94,8 +98,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* (CSS styles are kept here, unchanged) */
-        /* Main Layout Adjustments for Horizontal View */
+        /* (All your CSS styles remain unchanged here) */
+         /* Main Layout Adjustments for Horizontal View */
         body { 
             margin:0; color:white; min-height:100vh; display:flex; align-items:center; justify-content:center;
             background: radial-gradient(1200px 600px at 10% 10%, rgba(76,91,155,0.35), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%), linear-gradient(135deg, #171b30, #20254a 55%, #3c467b);
@@ -246,10 +250,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 </div>
 
-</body>
-</html>
 <script>
-// PHP-triggered SweetAlert2 message
+// --- 3. ADDED PHP-triggered SweetAlert2 success message ---
+<?php if ($show_success_alert): ?>
+Swal.fire({
+    icon: 'success',
+    title: 'Registration Successful!',
+    text: 'Welcome to SkillForge. Preparing your dashboard...',
+    background: '#3c467b',
+    color: '#fff',
+    timer: 2500, // Show the alert for 2.5 seconds
+    showConfirmButton: false, // Hide the "OK" button
+    timerProgressBar: true,
+}).then(() => {
+    // This function runs after the alert closes
+    window.location.href = 'loading.php';
+});
+<?php endif; ?>
+
+// PHP-triggered SweetAlert2 error message
 <?php if ($message): ?>
 Swal.fire({
     icon: 'error',
@@ -261,7 +280,8 @@ Swal.fire({
 });
 <?php endif; ?>
 
-// Password strength and validation
+// The rest of the JavaScript remains unchanged
+// (Password strength and validation logic here...)
 (function(){
     var form = document.getElementById('registerForm');
     var usernameField = document.getElementById('username');
@@ -305,11 +325,11 @@ Swal.fire({
         
         // Check if all fields are filled and password is valid
         const isFormValid = usernameField.value.trim() !== '' &&
-                            emailField.value.trim() !== '' &&
-                            passwordField.value.trim() !== '' &&
-                            confirmPasswordField.value.trim() !== '' &&
-                            !isPasswordWeak &&
-                            passwordField.value === confirmPasswordField.value;
+                              emailField.value.trim() !== '' &&
+                              passwordField.value.trim() !== '' &&
+                              confirmPasswordField.value.trim() !== '' &&
+                              !isPasswordWeak &&
+                              passwordField.value === confirmPasswordField.value;
         
         submitBtn.disabled = !isFormValid;
     }
@@ -470,3 +490,6 @@ Swal.fire({
     var nodes=[], NUM=40, K=4; for(var i=0;i<NUM;i++){ nodes.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*0.15*DPR,vy:(Math.random()-0.5)*0.15*DPR,p:Math.random()*1e3}); }
     function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); var isLight=document.body.classList.contains('light'); for(var i=0;i<nodes.length;i++){ var a=nodes[i]; ctx.fillStyle='rgba(255,255,255,0.02)'; ctx.beginPath(); ctx.arc(a.x,a.y,2*DPR,0,Math.PI*2); ctx.fill(); var near=[]; for(var j=0;j<nodes.length;j++) if(j!==i){var b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy; near.push({j:j,d:d});} near.sort(function(p,q){return p.d-q.d;}); for(var k=0;k<K;k++){ var idx=near[k]&&near[k].j; if(idx==null) continue; var b=nodes[idx],dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy),alpha=Math.max(0,1-dist/(180*DPR)); if(alpha<=0) continue; ctx.strokeStyle=isLight?('rgba(255,203,0,'+(0.16*alpha)+')'):'rgba(160,190,255,'+(0.12*alpha)+')'; ctx.lineWidth=1*DPR; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); var t=(Date.now()+a.p)%1200/1200; var px=a.x+(b.x-a.x)*t, py=a.y+(b.y-a.y)*t; var grad=ctx.createRadialGradient(px,py,0,px,py,10*DPR); if(isLight){grad.addColorStop(0,'rgba(255,220,120,'+(0.45*alpha)+')'); grad.addColorStop(1,'rgba(255,220,120,0)');} else {grad.addColorStop(0,'rgba(120,220,255,'+(0.35*alpha)+')'); grad.addColorStop(1,'rgba(120,220,255,0)');} ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(px,py,10*DPR,0,Math.PI*2); ctx.fill(); }} for(var i=0;i<nodes.length;i++){ var n=nodes[i]; n.x+=n.vx; n.y+=n.vy; if(n.x<0||n.x>canvas.width) n.vx*=-1; if(n.y<0||n.y>canvas.height) n.vy*=-1;} requestAnimationFrame(loop);} loop();})();
 </script>
+
+</body>
+</html>
