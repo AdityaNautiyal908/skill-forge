@@ -57,7 +57,7 @@ $redirect_delay_ms = 2500; // Display animation for 2.5 seconds
 <body>
     <div class="d-flex flex-column align-items-center">
         <dotlottie-wc 
-            src="https://lottie.host/1668d9ca-22e5-457b-9221-31e634e220e3/bnte5yZc73.lottie" 
+            src="https://lottie.host/875b45ac-4512-42f0-a049-e893704b1984/pMXeAbEXw7.lottie" 
             style="width: 300px; height: 300px;" 
             autoplay loop
         ></dotlottie-wc>
