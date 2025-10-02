@@ -12,7 +12,7 @@ if (isset($_SESSION['user_id']) && !isset($_GET['public'])) {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CodeLearn - Learn & Practice Programming</title>
+<title>Skill Forge</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
 html, body { height: 100%; }
