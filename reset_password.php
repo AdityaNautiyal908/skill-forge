@@ -171,32 +171,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $is_valid_token) {
     </div>
     
     <script>
-        // SweetAlert for status messages
-        <?php if ($message): 
-            // Determine icon based on message content
-            $icon = 'info'; // Default for invalid/expired token messages
-            $title = 'Request Status';
-
-            if (strpos($message, 'Success!') !== false) {
-                $icon = 'success'; // Use green checkmark for successful reset
-                $title = 'Password Reset Complete'; 
-            } elseif (strpos($message, 'error:') !== false || strpos($message, 'match') !== false) {
-                $icon = 'error'; // Use red X for validation or database errors
-                $title = 'Reset Failed';
-            }
+        <?php if (!empty($message)): 
+            if (strpos($message, 'Success!') !== false) { 
         ?>
-        Swal.fire({
-            icon: '<?= $icon ?>',
-            title: '<?= $title ?>',
-            text: '<?= htmlspecialchars($message) ?>',
-            background: '#3c467b',
-            color: '#fff',
-            confirmButtonColor: '#6d7cff'
-        });
-        <?php endif; ?>
+                let timerInterval;
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Password Reset!',
+                    html: 'Your password has been changed successfully.<br>Redirecting you in <b></b> milliseconds.',
+                    timer: 3000, 
+                    timerProgressBar: true,
+                    background: '#3c467b',
+                    color: '#fff',
+                    didOpen: () => {
+                        Swal.showLoading();
+                        const b = Swal.getHtmlContainer().querySelector('b');
+                        timerInterval = setInterval(() => {
+                            b.textContent = Swal.getTimerLeft();
+                        }, 100);
+                    },
+                    willClose: () => {
+                        clearInterval(timerInterval);
+                        window.location.href = 'login.php'; 
+                    }
+                });
+        <?php 
+            } else { 
+        ?>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Reset Failed',
+                    text: '<?= addslashes($message) ?>',
+                    background: '#3c467b',
+                    color: '#fff',
+                    confirmButtonColor: '#6d7cff'
+                });
+        <?php 
+            }
+        endif; ?>
     </script>
     <script>
-        // Copy the animated background script from login.php
         (function(){
             var canvas = document.getElementById('webLogin'); if (!canvas) return; var ctx = canvas.getContext('2d'); var DPR = Math.max(1, window.devicePixelRatio||1);
             function resize(){ canvas.width=innerWidth*DPR; canvas.height=innerHeight*DPR; } window.addEventListener('resize', resize); resize();
