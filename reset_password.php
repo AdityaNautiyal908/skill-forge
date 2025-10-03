@@ -1,16 +1,19 @@
 <?php
 session_start();
 require_once "config/db_mysql.php";
+require_once "includes/mailer.php"; // Added to use the send_mail function
 
 $message = "";
 $token = $_GET['token'] ?? '';
 $is_valid_token = false;
-$user_id = null; // Variable to store the user ID if the token is valid
+$user_id = null; 
+$username = null; // Variable to store username
+$email = null;    // Variable to store email
 
 // --- 1. Token Validation ---
 if (!empty($token)) {
-    // Check if the token exists and has not expired (reset_expires_at > NOW())
-    $stmt = $conn->prepare("SELECT id FROM users WHERE reset_token = ? AND reset_expires_at > NOW()");
+    // MODIFIED: Fetch id, username, and email to use for the confirmation email later
+    $stmt = $conn->prepare("SELECT id, username, email FROM users WHERE reset_token = ? AND reset_expires_at > NOW()");
     $stmt->bind_param("s", $token);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -18,7 +21,9 @@ if (!empty($token)) {
 
     if ($user) {
         $is_valid_token = true;
-        $user_id = $user['id']; // Store the user ID for the POST request
+        $user_id = $user['id']; 
+        $username = $user['username']; // Store the username
+        $email = $user['email'];       // Store the email
     } else {
         $message = "Invalid or expired password reset link. Please request a new one.";
     }
@@ -52,6 +57,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $is_valid_token) {
         $stmt->bind_param("si", $password_hash, $user_id);
         
         if ($stmt->execute()) {
+            
+            // --- NEW: SEND PASSWORD CHANGE CONFIRMATION EMAIL ---
+            $subject = "Security Alert: Your SkillForge Password Has Been Changed";
+            $body = "
+                <h2>Password Changed Successfully</h2>
+                <p>Hello " . htmlspecialchars($username) . ",</p>
+                <p>This is a confirmation that the password for your SkillForge account was successfully changed at " . date('Y-m-d H:i:s') . ".</p>
+                <p>If you did not make this change, please secure your account immediately by resetting your password again and contacting our support.</p>
+                <p>Thank you,<br>The SkillForge Team</p>
+            ";
+            
+            // Use your existing mailer function to send the email
+            send_mail($email, $subject, $body);
+            // --- END OF NEW EMAIL LOGIC ---
+
             $message = "Success! Your password has been reset. You will be redirected to the login page.";
             // Redirect the user to the login page after a delay
             header("refresh:5;url=login.php");
