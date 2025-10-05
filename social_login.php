@@ -2,17 +2,24 @@
 session_start();
 require_once 'vendor/autoload.php'; 
 
+// --- ADD THESE TWO LINES AT THE TOP ---
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__); // Points to your project root
+$dotenv->load();
+// ------------------------------------
+
 // Configuration array
 $config = [
-    'callback' => 'http://localhost/skill-forge/social_login.php', // MUST MATCH what you set in Google/GitHub
+    'callback' => 'http://localhost/skill-forge/social_login.php',
     'providers' => [
         'Google' => [
             'enabled' => true,
-            'keys'    => ['id' => 'GOOGLE_CLIENT_ID', 'secret' => 'GOOGLE_CLIENT_SECRET'],
+            // --- CHANGE THESE LINES ---
+            'keys'    => ['id' => $_ENV['GOOGLE_CLIENT_ID'], 'secret' => $_ENV['GOOGLE_CLIENT_SECRET']],
         ],
         'GitHub' => [
             'enabled' => true,
-            'keys'    => ['id' => 'GITHUB_CLIENT_ID', 'secret' => 'GITHUB_CLIENT_SECRET'],
+            // --- AND CHANGE THESE LINES ---
+            'keys'    => ['id' => $_ENV['GITHUB_CLIENT_ID'], 'secret' => $_ENV['GITHUB_CLIENT_SECRET']],
         ],
     ],
 ];
