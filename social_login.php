@@ -13,13 +13,14 @@ $config = [
     'providers' => [
         'Google' => [
             'enabled' => true,
-            // --- CHANGE THESE LINES ---
             'keys'    => ['id' => $_ENV['GOOGLE_CLIENT_ID'], 'secret' => $_ENV['GOOGLE_CLIENT_SECRET']],
         ],
         'GitHub' => [
             'enabled' => true,
-            // --- AND CHANGE THESE LINES ---
             'keys'    => ['id' => $_ENV['GITHUB_CLIENT_ID'], 'secret' => $_ENV['GITHUB_CLIENT_SECRET']],
+            'authorize_url_parameters' => [
+                'prompt' => 'consent',
+            ],
         ],
     ],
 ];
@@ -33,7 +34,6 @@ try {
 
     // 2. Use the provider from the session. If it's not set, something is wrong.
     if (empty($_SESSION['provider'])) {
-        // You can customize this error message
         die("Error: No provider specified or session has expired. Please try again.");
     }
     $providerName = $_SESSION['provider'];
@@ -73,7 +73,6 @@ try {
     } else {
         
         // For social logins, they don't have a password in your system.
-        // Store a long random string or NULL for the password.
         $randomPassword = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
         
         // Make sure your `users` table has columns `auth_provider` and `provider_uid`
@@ -92,8 +91,18 @@ try {
         exit();
     }
 
-    // --- DATABASE LOGIC ENDS HERE ---
 
 } catch (\Exception $e) {
-    echo 'Oops, we ran into an issue: ' . $e->getMessage();
+    // --- THIS BLOCK IS UPDATED ---
+    // Check if the user denied access from the provider
+    if (isset($_GET['error']) && $_GET['error'] === 'access_denied') {
+        // User canceled the authorization, redirect them back to the registration page.
+        // You can change 'register.php' to your desired page (e.g., 'login.php').
+        header('Location: register.php');
+        exit();
+    } else {
+        // For all other errors, display a generic message
+        echo 'Oops, we ran into an issue: ' . $e->getMessage();
+    }
 }
+
