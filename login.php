@@ -17,8 +17,11 @@ if (isset($_COOKIE['remember_user_id']) && !isset($_SESSION['user_id'])) {
         $user = $result->fetch_assoc();
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
-        $_SESSION['role'] = isset($user['role']) ? $user['role'] : 'user';
         
+        // **FIXED LOGIC FOR REMEMBER ME:**
+        $_SESSION['role'] = isset($user['role']) ? $user['role'] : 'user';
+        $_SESSION['is_admin'] = (isset($user['role']) && $user['role'] === 'admin'); // <-- This line is correct
+
         // Redirect to loading page after "remember me" login
         $_SESSION['show_preloader'] = true;
         header("Location: loading.php");
@@ -31,6 +34,9 @@ if (isset($_POST['guest_login'])) {
     $_SESSION['user_id'] = 'guest'; 
     $_SESSION['username'] = 'Guest';
     $_SESSION['role'] = 'guest'; 
+    
+    // NOTE: Guest users are never admins
+    $_SESSION['is_admin'] = false; // <-- Good practice to explicitly set this
     
     // Redirect to dashboard (no animation needed for instant guest access)
     header("Location: dashboard.php");
@@ -58,7 +64,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // *** SUCCESSFUL LOGIN: SET SESSION AND REDIRECT TO LOADER ***
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
-                $_SESSION['role'] = isset($user['role']) ? $user['role'] : 'user';
+                
+                // *** CRITICAL FIX APPLIED HERE: ***
+                $role = isset($user['role']) ? $user['role'] : 'user';
+                $_SESSION['role'] = $role;
+                $_SESSION['is_admin'] = ($role === 'admin'); // <-- NOW SETTING is_admin FLAG
 
                 if ($remember_me) {
                     $expiry = time() + (86400 * 30); 

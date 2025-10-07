@@ -10,6 +10,10 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// *** Admin Check (assuming your session stores 'is_admin') ***
+$isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+
+
 // Date range filter (optional)
 $range = isset($_GET['range']) ? trim($_GET['range']) : 'all';
 $now = time() * 1000; // ms for MongoDB date comparisons
@@ -60,11 +64,13 @@ $userIds = array_map(function($doc){ return (int)$doc->_id; }, $results);
 $usernames = [];
 if (!empty($userIds)) {
     $placeholders = str_repeat('?,', count($userIds) - 1) . '?';
+    // Use prepared statements for security
     $stmt = $conn->prepare("SELECT id, username FROM users WHERE id IN ($placeholders)");
     $stmt->bind_param(str_repeat('i', count($userIds)), ...$userIds);
     $stmt->execute();
     $res = $stmt->get_result();
     while ($row = $res->fetch_assoc()) {
+        // Ensure the key is an integer, matching the MongoDB user ID type
         $usernames[(int)$row['id']] = $row['username'];
     }
 }
@@ -83,6 +89,7 @@ function rankBadge($rank) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SkillForge — Leaderboard</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
 <style>
 body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200px 600px at 10% 10%, rgba(76,91,155,0.35), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%), linear-gradient(135deg, #171b30, #20254a 55%, #3c467b); }
 .light { color:#2d3748 !important; background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%), linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0) !important; }
@@ -109,6 +116,25 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
   </div>
 </nav>
 
+<?php if (isset($_SESSION['message'])): ?>
+    <div class="container mt-3">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?= htmlspecialchars($_SESSION['message']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    <?php unset($_SESSION['message']); ?>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['error'])): ?>
+    <div class="container mt-3">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error:</strong> <?= htmlspecialchars($_SESSION['error']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
 <div class="container my-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 class="mb-0">Leaderboard</h3>
@@ -135,7 +161,19 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
           </tr>
         </thead>
         <tbody>
-          <?php $rank=0; foreach ($results as $row): $rank++; $uid=(int)$row->_id; $name=$usernames[$uid] ?? ('User #'.$uid); $count=(int)($row->count ?? 0); $lastTs = ($row->lastSolved instanceof MongoDB\BSON\UTCDateTime) ? $row->lastSolved->toDateTime()->format('Y-m-d H:i:s') : ''; ?>
+          <?php 
+          $rank=0; 
+          foreach ($results as $row): 
+            $rank++; 
+            $uid=(int)$row->_id; 
+            
+            // Check if user is missing a username from MySQL
+            $isUserMissing = !isset($usernames[$uid]);
+            $name = $isUserMissing ? ('User #'.$uid) : $usernames[$uid];
+            
+            $count=(int)($row->count ?? 0); 
+            $lastTs = ($row->lastSolved instanceof MongoDB\BSON\UTCDateTime) ? $row->lastSolved->toDateTime()->format('Y-m-d H:i:s') : ''; 
+          ?>
             <tr>
               <td><?= rankBadge($rank) ?></td>
               <td class="fw-semibold">
@@ -144,6 +182,20 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
                   <span class="ms-2 medal"><?= $rank===1?'🥇':($rank===2?'🥈':'🥉') ?></span>
                 <?php endif; ?>
                 <div class="small text-muted">ID: <?= $uid ?></div>
+                
+                <?php 
+                // *** UPDATED CONDITION: Show button if the viewer is an Admin, regardless of user status ***
+                $showCleanUpButton = $isAdmin;
+                
+                if ($showCleanUpButton): 
+                ?>
+                  <a href="#" 
+                     data-delete-href="admin_delete_user_submissions.php?user_id=<?= $uid ?>&return_to=<?= urlencode($_SERVER['REQUEST_URI']) ?>"
+                     data-user-id="<?= $uid ?>"
+                     class="btn btn-sm btn-danger mt-1 clean-up-btn">
+                    <small>Clean Up</small>
+                  </a>
+                <?php endif; ?>
               </td>
               <td><?= $count ?></td>
               <td><?= htmlspecialchars($lastTs) ?></td>
@@ -163,6 +215,64 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
   function apply(){ var theme=localStorage.getItem('sf_theme')||'dark'; var anim=localStorage.getItem('sf_anim')||'on'; document.body.classList.toggle('light', theme==='light'); document.body.classList.toggle('no-anim', anim==='off'); }
   apply();
 })();
+
+
+// SweetAlert2 confirmation handler for Clean Up button
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Swal (SweetAlert2) is loaded
+    if (typeof Swal === 'undefined') {
+        console.error('SweetAlert2 is not loaded. Ensure the script tag is present.');
+        return;
+    }
+    
+    const cleanUpButtons = document.querySelectorAll('.clean-up-btn');
+
+    cleanUpButtons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault(); // Stop the default link action
+
+            const deleteUrl = this.getAttribute('data-delete-href');
+            const userId = this.getAttribute('data-user-id');
+            
+            // *** CORRECTED LOGIC: Find the entire <td>, then find the user's name element within it ***
+            const userCell = this.closest('td');
+            const nameElement = userCell.querySelector('.fw-semibold');
+            
+            let userName = 'Unknown User'; // Default name
+
+            if (nameElement) {
+                // Get the text content, strip the rank number (#4, #5) and the ID line.
+                // This extracts only the visible username (Aditya, Luffy, User #0)
+                let fullText = nameElement.firstChild ? nameElement.firstChild.nodeValue.trim() : nameElement.textContent.trim();
+                userName = fullText.split('\n')[0].trim(); // Get the first line (the name itself)
+            }
+            // *** END CORRECTED LOGIC ***
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `WARNING: You are about to delete ALL submissions for user "${userName}" (ID #${userId}). This action is irreversible!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                
+                // Custom styling to match your dark theme
+                confirmButtonColor: '#dc3545', // Red for delete
+                cancelButtonColor: '#6c757d', // Secondary/Grey
+                background: '#20254a', 
+                color: '#fff', 
+                customClass: {
+                    container: 'leaderboard-swal-container' 
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // If confirmed, redirect to the PHP cleanup script
+                    window.location.href = deleteUrl;
+                }
+            });
+        });
+    });
+});
 </script>
 </body>
 </html>

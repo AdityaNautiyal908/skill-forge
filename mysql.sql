@@ -1,17 +1,21 @@
--- Create the database
-CREATE DATABASE IF NOT EXISTS coding_platform;
-
--- Use the database
 USE coding_platform;
-
--- Users table
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'user';
-UPDATE users SET role='admin' WHERE email='your-admin-email';
+show tables;
+select * from users;
+
+desc users;
+
+ALTER TABLE `users`
+ADD COLUMN `reset_token` VARCHAR(64) NULL AFTER `password_hash`,
+ADD COLUMN `reset_expires_at` DATETIME NULL AFTER `reset_token`;
+
+show tables;
+
+
