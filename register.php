@@ -291,7 +291,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) { // Chec
             <div class="mb-3">
                 <label class="form-label">Password</label>
                 <div class="password-input-wrapper">
-                    <input type="password" name="password" id="password" class="form-control" required minlength="8">
+                    <input type="password" name="password" id="password" class="form-control" required minlength="8" autocomplete="on">
                     <button type="button" class="password-toggle" id="togglePassword" title="Show/Hide Password">
                         <span class="eye-svg" aria-hidden="true"></span>
                     </button>
@@ -307,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) { // Chec
             <div class="mb-3">
                 <label class="form-label">Confirm Password</label>
                 <div class="password-input-wrapper">
-                    <input type="password" name="confirmPassword" id="confirmPassword" class="form-control" required>
+                    <input type="password" name="confirmPassword" id="confirmPassword" class="form-control" required autocomplete="on">
                     <button type="button" class="password-toggle" id="toggleConfirmPassword" title="Show/Hide Password">
                         <span class="eye-svg" aria-hidden="true"></span>
                     </button>
