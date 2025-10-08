@@ -15,6 +15,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['co
     try {
         $coll = getCollection('coding_platform', 'comments');
         $bulk = new MongoDB\Driver\BulkWrite;
+        // NOTE: Using soft delete by setting 'deleted' flag
         $bulk->update(
             ['_id' => new MongoDB\BSON\ObjectId($_POST['comment_id'])],
             ['$set' => [
@@ -25,7 +26,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['co
             ['upsert' => false]
         );
         $coll['manager']->executeBulkWrite($coll['db'] . '.comments', $bulk);
-        $message = "Comment deleted successfully.";
+        $message = "Comment deleted successfully (soft-deleted).";
     } catch (Exception $e) {
         $error = "Failed to delete comment: " . $e->getMessage();
     }
@@ -49,6 +50,8 @@ try {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SkillForge — Admin Feedback Management</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- SweetAlert2 CSS for styled alerts -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <style>
 body {
     margin: 0;
@@ -123,6 +126,25 @@ body {
 .alert {
     border-radius: 10px;
     border: none;
+}
+
+/* --- Custom SweetAlert2 Theme Styles --- */
+/* Match the dark blue background from the provided image */
+.swal2-skillforge-theme {
+    background-color: #1F2D44 !important;
+    color: white !important;
+    border-radius: 10px !important;
+}
+
+/* Style the icon to match the orange/ochre color from the provided image */
+.swal2-skillforge-theme .swal2-icon.swal2-warning {
+    border-color: #E89D4B !important;
+    color: #E89D4B !important;
+}
+
+/* Ensure the cancel button matches the dark grey color from the provided image */
+.swal2-cancel.swal2-styled {
+    background-color: #6C747D !important;
 }
 </style>
 </head>
@@ -242,10 +264,12 @@ body {
                                                     data-comment-rating="<?= $comment->rating ?>">
                                                 Edit
                                             </button>
-                                            <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this comment?');">
+                                            <!-- Added class 'delete-form' for JavaScript targeting -->
+                                            <form method="POST" class="delete-form" style="display: inline;">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="comment_id" value="<?= (string)$comment->_id ?>">
-                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                <!-- Added class 'delete-btn' for clarity, though form submission handles the logic -->
+                                                <button type="submit" class="btn btn-danger btn-sm delete-btn">Delete</button>
                                             </form>
                                         <?php else: ?>
                                             <span class="text-muted">No actions</span>
@@ -298,9 +322,13 @@ body {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- SweetAlert2 JS inclusion -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- Edit Modal Logic (Original) ---
     // Add event listeners to all edit buttons
     document.querySelectorAll('.edit-comment-btn').forEach(function(button) {
         button.addEventListener('click', function() {
@@ -319,10 +347,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 modal.show();
             } catch (error) {
                 console.error('Error opening edit modal:', error);
-                alert('Error opening edit form. Please try again.');
+                // Note: Using a standard alert here as a fallback since a modal failed
+                console.log('Error opening edit form. Please try again.');
             }
         });
     });
+
+    // --- SweetAlert2 Delete Confirmation Logic ---
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Stop the default form submission
+
+            const formToSubmit = this;
+            const commentId = formToSubmit.querySelector('input[name="comment_id"]').value;
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Permanently delete user feedback (ID: " + commentId + ")? WARNING: This action performs a soft-delete and cannot be easily undone.",
+                icon: 'warning',
+                showCancelButton: true,
+                // Custom text and colors to match the provided image
+                confirmButtonText: 'Yes, delete permanently!',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#E64A53', // Bright Red from image
+                cancelButtonColor: '#6C747D',  // Dark Grey from image
+                customClass: {
+                    popup: 'swal2-skillforge-theme', // Applies the custom background and icon colors
+                    title: 'text-white',
+                    htmlContainer: 'text-white'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // If confirmed, submit the original form
+                    formToSubmit.submit();
+                }
+            });
+        });
+    });
+
 });
 </script>
 
