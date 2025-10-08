@@ -193,7 +193,7 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
                      data-delete-href="admin_delete_user_submissions.php?user_id=<?= $uid ?>&return_to=<?= urlencode($_SERVER['REQUEST_URI']) ?>"
                      data-user-id="<?= $uid ?>"
                      class="btn btn-sm btn-danger mt-1 clean-up-btn">
-                    <small>Clean Up</small>
+                    <small>Delete</small>
                   </a>
                 <?php endif; ?>
               </td>
