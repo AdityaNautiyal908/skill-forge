@@ -80,60 +80,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SkillForge — Admin Mailer</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="assets\css\admin_mail.css"> 
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        body {
-            /* Use your standard dark background */
-            background: linear-gradient(135deg, #171b30, #20254a 55%, #3c467b);
-            color: white;
-            min-height: 100vh;
-            padding-top: 50px;
-        }
-        .container {
-            max-width: 800px;
-            background: rgba(60,70,123,0.25);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        .form-control, .form-select {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-        .form-control:focus, .form-select:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: #6d7cff;
-            color: white;
-            box-shadow: 0 0 0 0.2rem rgba(109, 124, 255, 0.25);
-        }
-        .btn-primary-glow {
-            background: linear-gradient(135deg, #6d7cff, #7aa2ff);
-            border: none;
-            box-shadow: 0 8px 30px rgba(109,124,255,0.35);
-        }
-        
-        /* --- NEW BACK BUTTON STYLES --- */
-        .back-link-animated {
-            color: #7aa2ff; /* Light blue color */
-            text-decoration: none; /* Remove default underline */
-            font-size: 1.05rem;
-            display: inline-block;
-            transition: color 0.3s ease, text-shadow 0.3s ease;
-            margin-bottom: 20px;
-        }
-        .back-link-animated:hover {
-            color: #fff; /* White text on hover */
-            text-shadow: 0 0 8px rgba(122, 162, 255, 0.8); /* Subtle glow effect */
-            transform: translateX(-2px); /* Slight shift to the left */
-        }
-        /* Make sure the text color is reset when Bootstrap's text-info is used if you keep it */
-        .back-link-animated.text-info {
-             /* Ensures that the color is driven by the hover styles */
-             color: inherit !important; 
-        }
-
-    </style>
 </head>
 <body>
 
@@ -145,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <form method="POST" action="">
         <div class="mb-4">
             <label for="recipient_type" class="form-label">Send To:</label>
-            <select class="form-select" id="recipient_type" name="recipient_type" required onchange="toggleEmailInput(this.value)">
+            <select class="form-select" id="recipient_type" name="recipient_type" required>
                 <option value="all" selected>All Registered Users (excluding admins)</option>
                 <option value="single">Single User (by Email)</option>
             </select>
@@ -173,37 +123,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </div>
 
 <script>
-    function toggleEmailInput(value) {
-        const div = document.getElementById('singleEmailDiv');
-        div.style.display = (value === 'single') ? 'block' : 'none';
-        document.getElementById('single_email').required = (value === 'single');
-    }
-    
-    // Initial call to set state correctly
-    document.addEventListener('DOMContentLoaded', () => {
-        toggleEmailInput(document.getElementById('recipient_type').value);
-    });
-
-    // SweetAlert for messages
-    <?php if ($error): ?>
-    Swal.fire({
-        icon: 'error',
-        title: 'Mail Send Error',
-        text: '<?= htmlspecialchars($error) ?>',
-        background: '#3c467b',
-        color: '#fff',
-        confirmButtonColor: '#dc3545'
-    });
-    <?php elseif ($message): ?>
-    Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: '<?= htmlspecialchars($message) ?>',
-        background: '#3c467b',
-        color: '#fff',
-        confirmButtonColor: '#6d7cff'
-    });
-    <?php endif; ?>
+    // Pass PHP messages to JavaScript
+    const PHP_ERROR = '<?= $error ? htmlspecialchars($error, ENT_QUOTES) : '' ?>';
+    const PHP_MESSAGE = '<?= $message ? htmlspecialchars($message, ENT_QUOTES) : '' ?>';
 </script>
+
+<script src="assets\js\admin_mail.js"></script>
 </body>
 </html>

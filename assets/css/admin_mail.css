@@ -1,0 +1,50 @@
+body {
+    /* Use your standard dark background */
+    background: linear-gradient(135deg, #171b30, #20254a 55%, #3c467b);
+    color: white;
+    min-height: 100vh;
+    padding-top: 50px;
+}
+.container {
+    max-width: 800px;
+    background: rgba(60,70,123,0.25);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+.form-control, .form-select {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+.form-control:focus, .form-select:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #6d7cff;
+    color: white;
+    box-shadow: 0 0 0 0.2rem rgba(109, 124, 255, 0.25);
+}
+.btn-primary-glow {
+    background: linear-gradient(135deg, #6d7cff, #7aa2ff);
+    border: none;
+    box-shadow: 0 8px 30px rgba(109,124,255,0.35);
+    transition: all 0.2s ease;
+}
+.btn-primary-glow:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* --- NEW BACK BUTTON STYLES --- */
+.back-link-animated {
+    color: #7aa2ff; /* Light blue color */
+    text-decoration: none; /* Remove default underline */
+    font-size: 1.05rem;
+    display: inline-block;
+    transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
+    margin-bottom: 20px;
+}
+.back-link-animated:hover {
+    color: #fff; /* White text on hover */
+    text-shadow: 0 0 8px rgba(122, 162, 255, 0.8); /* Subtle glow effect */
+    transform: translateX(-5px); /* Slight shift to the left */
+}
