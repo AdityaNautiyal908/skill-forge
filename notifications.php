@@ -113,7 +113,6 @@ if (isset($_GET['action'])) {
         'has_notifications' => $hasNotifications,
         'count' => $hasNotifications ? 1 : 0
     ];
-}
 
 // Function to clear notifications for a user
 function clearNotifications($userId) {

@@ -62,8 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Increment index for next problem
         $index++;
+        $message = "Code submitted successfully!";
         if ($index < count($allProblems)) {
-            header("Location: problems.php?language=$language&index=$index&msg=" . urlencode("Code submitted successfully!"));
+            header("Location: problems.php?language=$language&index=$index&msg=" . urlencode($message));
             exit;
         } else {
             header("Location: problems.php?language=$language&index=" . ($index-1) . "&msg=" . urlencode("Congratulations! You completed all problems!"));
@@ -83,115 +84,8 @@ if (isset($_GET['msg'])) $successMessage = $_GET['msg'];
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SkillForge — <?= htmlspecialchars($problem->title) ?></title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="assets\css\problems.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.1/ace.js" crossorigin="anonymous"></script>
-<style>
-/* ... (Existing styles remain the same) ... */
-body {
-    margin: 0;
-    color: white;
-    min-height: 100vh;
-    background: radial-gradient(1200px 600px at 10% 10%, rgba(76,91,155,0.35), transparent 60%),
-                radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%),
-                linear-gradient(135deg, #171b30, #20254a 55%, #3c467b);
-    overflow-x: hidden;
-}
-.light { color:#2d3748 !important; background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%), linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0) !important; }
-.light .title, .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 { color: #1a202c !important; }
-.light .subtitle, .light p, .light .desc, .light .card-text { color: #4a5568 !important; }
-.stars { position: fixed; inset: 0; background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.7), transparent 60%), radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.55), transparent 60%), radial-gradient(1px 1px at 65% 25%, rgba(255,255,255,0.6), transparent 60%), radial-gradient(1px 1px at 80% 55%, rgba(255,255,255,0.45), transparent 60%); opacity: .45; pointer-events: none; }
-.web { position: fixed; inset:0; z-index:0; pointer-events:none; }
-.no-anim .stars, .no-anim .web, .no-anim .orb { display:none !important; }
-.orb { position:absolute; border-radius:50%; filter: blur(20px); opacity:.45; animation: float 12s ease-in-out infinite; }
-.o1{ width: 200px; height: 200px; background:#6d7cff; top:-60px; left:-60px; }
-.o2{ width: 260px; height: 260px; background:#7aa2ff; bottom:-80px; right:10%; animation-delay:2s; }
-@keyframes float { 0%,100%{ transform:translateY(0)} 50%{ transform:translateY(-14px)} }
-
-.navbar {
-    background: rgba(10,12,28,0.45) !important;
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255,255,255,0.12);
-}
-.navbar-brand { font-weight: 700; }
-.section { position: relative; z-index: 1; }
-.panel { background: linear-gradient(180deg, rgba(60,70,123,0.42), rgba(60,70,123,0.18)); border: 1px solid rgba(255,255,255,0.14); border-radius: 16px; padding: 18px; }
-.title { font-weight: 800; }
-.desc { color: rgba(255,255,255,0.88); }
-.btn-primary, .btn-success { background: linear-gradient(135deg, #6d7cff, #7aa2ff); border: none; box-shadow: 0 8px 30px rgba(109,124,255,0.35); transition: transform .2s ease, box-shadow .2s ease, background .25s ease, filter .2s ease; }
-.btn-success:hover, .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 34px rgba(109,124,255,0.5); background: linear-gradient(135deg, #7b88ff, #8fb1ff); filter: brightness(1.05); }
-.btn-success:active, .btn-primary:active { transform: translateY(0); background: linear-gradient(135deg, #5a69f0, #6e90ff); filter: brightness(.98); }
-.btn-animated { position: relative; overflow:hidden; }
-.btn-animated .ripple { position:absolute; border-radius:50%; transform: scale(0); animation: ripple .6s linear; background: rgba(255,255,255,0.7); pointer-events:none; }
-@keyframes ripple { to { transform: scale(10); opacity: 0; } }
-.btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: white; }
-
-#editor { height: 420px; width: 100%; border: 1px solid rgba(255,255,255,0.18); border-radius: 12px; background:#1e1f2a; }
-.progress { height: 10px; background: rgba(255,255,255,0.12); }
-.progress-bar { background: linear-gradient(135deg, #36d1dc, #5b86e5); }
-@media (max-width: 576px){
-    #editor { height: 300px; }
-}
-
-/* --- NEW/MODIFIED: Navbar Toggle Button Styles --- */
-.nav-toggles {
-    display: flex;
-    gap: 12px;
-}
-.toggle-btn-nav {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    width: 64px; /* Width to hold two icons */
-    height: 32px; /* Height of the button */
-    padding: 4px;
-    background: rgba(0,0,0,0.35);
-    border: 1px solid rgba(255,255,255,0.4);
-    border-radius: 50px;
-    cursor: pointer;
-    transition: background .3s ease;
-}
-.toggle-btn-nav:hover {
-    background: rgba(0,0,0,0.5);
-}
-.toggle-btn-nav .icon-wrapper {
-    width: 24px;
-    height: 24px;
-    font-size: 16px;
-    display: grid;
-    place-items: center;
-    z-index: 1; /* Keep icons above the pseudo-element */
-    transition: color 0.3s ease;
-}
-/* The sliding circle background */
-.toggle-btn-nav::before {
-    content: '';
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    background: white;
-    border-radius: 50%;
-    top: 3px;
-    left: 4px;
-    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* Theme Toggle States */
-#themeToggleBtn .icon-sun { color: #333; } /* Active by default */
-#themeToggleBtn .icon-moon { color: #fff; } /* Inactive by default */
-
-#themeToggleBtn.dark-active::before { transform: translateX(calc(100% + 6px)); }
-#themeToggleBtn.dark-active .icon-sun { color: #fff; }
-#themeToggleBtn.dark-active .icon-moon { color: #333; }
-
-/* Animation Toggle States */
-#animToggleBtn .icon-on { color: #333; }
-#animToggleBtn .icon-off { color: #fff; }
-
-#animToggleBtn.anim-off-active::before { transform: translateX(calc(100% + 6px)); }
-#animToggleBtn.anim-off-active .icon-on { color: #fff; }
-#animToggleBtn.anim-off-active .icon-off { color: #333; }
-
-</style>
 </head>
 <body>
 <div class="stars"></div>
@@ -286,113 +180,7 @@ body {
     </div>
 </div>
 
-<script>
-// ... (ACE Editor and Exit Guard scripts) ...
-
-var editor = ace.edit("editor");
-editor.setTheme("ace/theme/monokai");
-editor.session.setMode("ace/mode/<?= htmlspecialchars($problem->language) ?>");
-editor.setOptions({ fontSize:"14pt", showPrintMargin:false });
-
-var form = document.querySelector("form");
-form.addEventListener("submit", function() {
-    document.querySelector("textarea[name='code']").value = editor.getValue();
-    // prevent leave warning on intentional submit
-    dirty = false;
-});
-
-// Warn on exit if code changed and not submitted yet
-var initialCode = editor.getValue();
-var dirty = false;
-editor.session.on('change', function(){
-    dirty = editor.getValue() !== initialCode;
-});
-
-function guardExit(e){
-    if (dirty) {
-        if (!confirm('You have unsaved code. Are you sure you want to leave?')) {
-            e.preventDefault();
-            return false;
-        }
-    }
-}
-
-var exitBtn = document.getElementById('exitBtn');
-if (exitBtn) exitBtn.addEventListener('click', guardExit);
-document.querySelectorAll('.nav-problem').forEach(function(a){ a.addEventListener('click', guardExit); });
-
-window.addEventListener('beforeunload', function (e) {
-    if (dirty) {
-        e.preventDefault();
-        e.returnValue = '';
-    }
-});
-
-// web effect
-(function(){
-    var canvas = document.getElementById('webProb'); if (!canvas) return; var ctx = canvas.getContext('2d'); var DPR = Math.max(1, window.devicePixelRatio||1);
-    function resize(){ canvas.width=innerWidth*DPR; canvas.height=innerHeight*DPR; } window.addEventListener('resize', resize); resize();
-    var nodes=[], NUM=45, K=4; for(var i=0;i<NUM;i++){ nodes.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*0.15*DPR,vy:(Math.random()-0.5)*0.15*DPR,p:Math.random()*1e3}); }
-    function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(var i=0;i<nodes.length;i++){ var a=nodes[i]; ctx.fillStyle='rgba(255,255,255,0.02)'; ctx.beginPath(); ctx.arc(a.x,a.y,2*DPR,0,Math.PI*2); ctx.fill(); var near=[]; for(var j=0;j<nodes.length;j++) if(j!==i){var b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy; near.push({j:j,d:d});} near.sort(function(p,q){return p.d-q.d;}); for(var k=0;k<K;k++){ var idx=near[k]&&near[k].j; if(idx==null) continue; var b=nodes[idx],dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy),alpha=Math.max(0,1-dist/(180*DPR)); if(alpha<=0) continue; var isLight=document.body.classList.contains('light'); ctx.strokeStyle=isLight?('rgba(255,203,0,'+(0.16*alpha)+')'):'rgba(160,190,255,'+(0.12*alpha)+')'; ctx.lineWidth=1*DPR; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); var t=(Date.now()+a.p)%1200/1200; var px=a.x+(b.x-a.x)*t, py=a.y+(b.y-a.y)*t; var grad=ctx.createRadialGradient(px,py,0,px,py,10*DPR); if(isLight){ grad.addColorStop(0,'rgba(255,220,120,'+(0.45*alpha)+')'); grad.addColorStop(1,'rgba(255,220,120,0)'); } else { grad.addColorStop(0,'rgba(120,220,255,'+(0.35*alpha)+')'); grad.addColorStop(1,'rgba(120,220,255,0)'); } ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(px,py,10*DPR,0,Math.PI*2); ctx.fill(); }} for(var i=0;i<nodes.length;i++){ var n=nodes[i]; n.x+=n.vx; n.y+=n.vy; if(n.x<0||n.x>canvas.width) n.vx*=-1; if(n.y<0||n.y>canvas.height) n.vy*=-1;} requestAnimationFrame(loop);} loop();})();
-
-// --- MODIFIED JAVASCRIPT FOR TOGGLES ---
-(function(){
-    var themeBtn = document.getElementById('themeToggleBtn');
-    var animBtn = document.getElementById('animToggleBtn');
-
-    function applyToggles(){ 
-        var theme = localStorage.getItem('sf_theme') || 'dark'; 
-        var anim = localStorage.getItem('sf_anim') || 'on'; 
-        
-        document.body.classList.toggle('light', theme === 'light'); 
-        document.body.classList.toggle('no-anim', anim === 'off');
-        
-        // Update button classes instead of text
-        if (themeBtn) {
-            themeBtn.classList.toggle('dark-active', theme === 'dark');
-        }
-        if (animBtn) {
-            animBtn.classList.toggle('anim-off-active', anim === 'off');
-        }
-    }
-    
-    applyToggles();
-    
-    if (themeBtn) {
-        themeBtn.onclick = function(){ 
-            var cur = localStorage.getItem('sf_theme') || 'dark'; 
-            var next = cur === 'dark' ? 'light' : 'dark'; 
-            localStorage.setItem('sf_theme', next); 
-            applyToggles(); 
-        };
-    }
-    
-    if (animBtn) {
-        animBtn.onclick = function(){ 
-            var cur = localStorage.getItem('sf_anim') || 'on'; 
-            var next = cur === 'on' ? 'off' : 'on'; 
-            localStorage.setItem('sf_anim', next); 
-            applyToggles(); 
-        };
-    }
-})();
-
-// Button ripple for submit
-(document.querySelectorAll('.btn-animated')||[]).forEach(function(btn){
-    btn.addEventListener('click', function(e){
-        var rect = this.getBoundingClientRect();
-        var ripple = document.createElement('span');
-        var size = Math.max(rect.width, rect.height);
-        ripple.className = 'ripple';
-        ripple.style.width = ripple.style.height = size + 'px';
-        ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
-        ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
-        this.appendChild(ripple);
-        setTimeout(function(){ ripple.remove(); }, 600);
-    });
-});
-</script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets\js\problems.js"></script>
 </body>
 </html>
