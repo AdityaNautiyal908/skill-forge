@@ -7,7 +7,7 @@
         document.body.classList.toggle('light', theme==='light'); 
         document.body.classList.toggle('no-anim', anim==='off'); 
     }
-    apply();
+    document.addEventListener('DOMContentLoaded', apply);
 })();
 
 

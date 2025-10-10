@@ -31,6 +31,17 @@ body {
 /* Navbar styling inherited from general styles */
 .navbar { background: rgba(0,0,0,0.35) !important; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.08); }
 
+/* Base delete button style */
 .btn-danger {
     padding: 2px 6px !important;
+    font-weight: 600;
+    transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* *** NEW/FIXED: Added light purple hover for the delete button *** */
+.btn-danger.clean-up-btn:hover {
+    background: #A08CDA; /* Light purple shade */
+    color: #fff;
+    box-shadow: 0 0 10px rgba(160, 140, 218, 0.8);
+    border-color: #A08CDA;
 }
