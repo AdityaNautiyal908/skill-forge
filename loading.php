@@ -22,37 +22,10 @@ $redirect_delay_ms = 2500; // Display animation for 2.5 seconds
     <title>SkillForge — Loading Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
+    <link rel="stylesheet" href="assets\css\loading.css">
+    
     <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.1/dist/dotlottie-wc.js" type="module"></script>
     
-    <style>
-        /* Minimalist dark theme for the loading screen */
-        body { 
-            background: linear-gradient(135deg, #171b30, #20254a 55%, #3c467b);
-            color: white; 
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-        h1 {
-            font-size: 1.5rem;
-            margin-top: 20px;
-            color: #7aa2ff;
-        }
-        /* Style for the Lottie component */
-        dotlottie-wc {
-            display: block;
-            margin: 0 auto;
-        }
-    </style>
-    
-    <script>
-        setTimeout(function() {
-            window.location.href = 'dashboard.php';
-        }, <?= $redirect_delay_ms ?>);
-    </script>
 </head>
 <body>
     <div class="d-flex flex-column align-items-center">
@@ -65,5 +38,12 @@ $redirect_delay_ms = 2500; // Display animation for 2.5 seconds
         <h1>Loading your personalized dashboard...</h1>
         <p class="text-muted">Preparing your coding environment.</p>
     </div>
+    
+    <script>
+        // Pass PHP variable to JavaScript
+        const REDIRECT_DELAY_MS = <?= $redirect_delay_ms ?>;
+    </script>
+    
+    <script src="assets\js\loading.js"></script>
 </body>
 </html>
