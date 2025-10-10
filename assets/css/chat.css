@@ -1,0 +1,49 @@
+body { 
+    margin: 0; 
+    color: white; 
+    min-height: 100vh; 
+    background: linear-gradient(135deg, #171b30, #20254a 55%, #3c467b); 
+}
+.navbar { 
+    background: rgba(0,0,0,0.35) !important; 
+    backdrop-filter: blur(10px); 
+}
+/* CRITICAL CSS FIX: Standard chat layout (newest at bottom) */
+.chat-box { 
+    background-color: #2c324c; 
+    border-radius: 12px; 
+    height: 70vh; 
+    overflow-y: scroll; 
+    padding: 15px; 
+    display: flex; 
+    flex-direction: column; /* Messages flow top-to-bottom */
+    justify-content: flex-start; /* Messages start at the top */
+}
+.message { 
+    padding: 10px 15px; 
+    margin-bottom: 8px; 
+    border-radius: 15px; 
+    max-width: 80%; 
+}
+.msg-self { 
+    background-color: #0d6efd; 
+    color: white; 
+    align-self: flex-end; 
+    margin-left: auto; 
+}
+.msg-other { 
+    background-color: #4a5568; 
+    color: white; 
+    align-self: flex-start; 
+}
+.username { 
+    font-weight: bold; 
+    font-size: 0.9em; 
+    margin-bottom: 2px; 
+}
+.timestamp { 
+    font-size: 0.75em; 
+    color: #aaa; 
+    margin-top: 5px; 
+    text-align: right; 
+}
