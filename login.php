@@ -108,8 +108,8 @@ $prompt_register = isset($_GET['prompt_register']) && $_GET['prompt_register'] =
     <div class="orb o2"></div>
 
     <div class="auth-card mx-3">
-        <div id="controls-container" class="mb-3 d-flex justify-content-end gap-2">
-            </div>
+        <!-- <div id="controls-container" class="mb-3 d-flex justify-content-end gap-2">
+            </div> -->
 
         <span class="brand">SkillForge</span>
         <h2 class="title" align="center">Welcome</h2>

@@ -1,6 +1,5 @@
 // --- SweetAlert2 logic ---
 
-// Function to handle SweetAlert2 for server-side messages (from PHP_MESSAGE)
 function handleServerMessages() {
     // PHP_MESSAGE and PROMPT_REGISTER are passed as global constants in login.php
     if (typeof PHP_MESSAGE !== 'undefined' && PHP_MESSAGE) {
