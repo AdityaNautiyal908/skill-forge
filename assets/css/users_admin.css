@@ -1,0 +1,31 @@
+body { 
+    margin:0; 
+    color:white; 
+    min-height:100vh; 
+    /* Dark theme background gradient */
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(76,91,155,0.35), transparent 60%), 
+                radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%), 
+                linear-gradient(135deg, #171b30, #20254a 55%, #3c467b); 
+}
+
+/* Panel/Card Styles */
+.panel { 
+    /* Dark theme panel with border */
+    background: linear-gradient(180deg, rgba(60,70,123,0.42), rgba(60,70,123,0.18)); 
+    border:1px solid rgba(255,255,255,0.14); 
+    border-radius:16px; 
+}
+
+/* Navbar Styles */
+.navbar { 
+    background: rgba(10,12,28,0.45) !important; 
+    border-bottom:1px solid rgba(255,255,255,0.12); 
+}
+
+/* Table Styles */
+table { 
+    color:#fff; 
+}
+table td, table th { 
+    border-color: rgba(255,255,255,0.18) !important; 
+}

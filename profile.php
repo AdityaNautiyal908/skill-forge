@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (strlen($new) < 8 || !preg_match('/[A-Z]/', $new) || !preg_match('/[a-z]/', $new) || !preg_match('/[0-9]/', $new) || !preg_match('/[^A-Za-z0-9]/', $new)) {
             $message = 'Password must be 8+ chars with upper, lower, number, and symbol.';
         } else {
-            // Fetch current hash (column expected: password_hash to match login/register.php usage)
+            // Fetch current hash
             $g = $conn->prepare("SELECT password_hash FROM users WHERE id = ?");
             $g->bind_param("i", $userId);
             $g->execute();
@@ -130,16 +130,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SkillForge — Profile</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200px 600px at 10% 10%, rgba(76,91,155,0.35), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%), linear-gradient(135deg, #171b30, #20254a 55%, #3c467b); }
-.light { color:#2d3748 !important; background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%), linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0) !important; }
-.panel { background: linear-gradient(180deg, rgba(60,70,123,0.42), rgba(60,70,123,0.18)); border:1px solid rgba(255,255,255,0.14); border-radius:16px; }
-.navbar { background: rgba(10,12,28,0.45) !important; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.12); }
-.btn-primary { background: linear-gradient(135deg, #6d7cff, #7aa2ff); border:none; box-shadow: 0 8px 30px rgba(109,124,255,0.35); }
-.btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: white; }
-</style>
+<link rel="stylesheet" href="assets\css\profile.css"> 
 </head>
-<body>
+<body class="<?= $prefs['theme'] === 'light' ? 'light' : 'dark' ?> <?= $prefs['animations'] === 'off' ? 'no-anim' : '' ?>">
 <nav class="navbar navbar-expand-lg navbar-dark">
   <div class="container">
     <a class="navbar-brand" href="dashboard.php">SkillForge</a>
@@ -160,8 +153,8 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
 
   <div class="row g-3">
     <div class="col-lg-6">
-      <div class="panel p-3">
-        <h5 class="mb-3">Profile</h5>
+      <div class="panel p-4">
+        <h5 class="mb-3">Profile Information</h5>
         <form method="POST" action="">
           <input type="hidden" name="action" value="profile">
           <div class="mb-3">
@@ -172,13 +165,17 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
             <label class="form-label">Email</label>
             <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" class="form-control" required>
           </div>
+          <div class="mb-3">
+            <label class="form-label">User Role</label>
+            <input type="text" value="<?= htmlspecialchars($user['role'] ?? 'user') ?>" class="form-control" disabled>
+          </div>
           <button class="btn btn-primary" type="submit">Save Profile</button>
         </form>
       </div>
     </div>
 
     <div class="col-lg-6">
-      <div class="panel p-3">
+      <div class="panel p-4">
         <h5 class="mb-3">Change Password</h5>
         <form method="POST" action="">
           <input type="hidden" name="action" value="password">
@@ -189,7 +186,7 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
           <div class="mb-3">
             <label class="form-label">New Password</label>
             <input type="password" name="new_password" class="form-control" required>
-            <div class="form-text">Min 8 chars, include upper, lower, number, and symbol.</div>
+            <div class="form-text text-white-50">Min 8 chars, include upper, lower, number, and symbol.</div>
           </div>
           <div class="mb-3">
             <label class="form-label">Confirm New Password</label>
@@ -201,8 +198,8 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
     </div>
 
     <div class="col-lg-6">
-      <div class="panel p-3">
-        <h5 class="mb-3">Preferences</h5>
+      <div class="panel p-4">
+        <h5 class="mb-3">Application Preferences</h5>
         <form method="POST" action="">
           <input type="hidden" name="action" value="preferences">
           <div class="mb-3">
@@ -228,19 +225,6 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-(function(){
-  // Apply theme/animation from either saved prefs or localStorage for immediate effect
-  function apply(){
-    var theme = '<?= $prefs['theme'] ?>' || (localStorage.getItem('sf_theme')||'dark');
-    var anim = '<?= $prefs['animations'] ?>' || (localStorage.getItem('sf_anim')||'on');
-    document.body.classList.toggle('light', theme==='light');
-    document.body.classList.toggle('no-anim', anim==='off');
-  }
-  apply();
-})();
-</script>
+<script src="assets\js\profile.js"></script>
 </body>
 </html>
-
-

@@ -1,0 +1,92 @@
+body { 
+    margin:0; 
+    color:white; 
+    min-height:100vh; 
+    /* Dark Theme Background */
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(76,91,155,0.35), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%), linear-gradient(135deg, #171b30, #20254a 55%, #3c467b); 
+}
+
+/* Light Theme Overrides */
+body.light { 
+    color:#2d3748 !important; 
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%), linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0) !important; 
+}
+body.light .text-white-50 {
+    color: #4a5568 !important;
+}
+
+/* Panel/Card Styles */
+.panel { 
+    /* Dark Theme Panel */
+    background: linear-gradient(180deg, rgba(60,70,123,0.42), rgba(60,70,123,0.18)); 
+    border:1px solid rgba(255,255,255,0.14); 
+    border-radius:16px; 
+}
+body.light .panel {
+    /* Light Theme Panel */
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Navbar */
+.navbar { 
+    background: rgba(10,12,28,0.45) !important; 
+    backdrop-filter: blur(10px); 
+    border-bottom: 1px solid rgba(255,255,255,0.12); 
+}
+
+/* Inputs/Forms (Generic Dark Theme Styles) */
+.form-control, .form-select { 
+    background-color: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: white;
+}
+.form-control:focus, .form-select:focus { 
+    background-color: rgba(255,255,255,0.12);
+    border-color: #6d7cff; 
+    box-shadow: 0 0 0 0.2rem rgba(109,124,255,0.25);
+}
+
+/* Inputs/Forms (Light Theme Overrides) */
+body.light .form-control, body.light .form-select {
+    background-color: #f7fafc;
+    border-color: #cbd5e0;
+    color: #2d3748;
+}
+body.light .form-control:focus, body.light .form-select:focus {
+    background-color: #fff;
+    border-color: #4c5b9b;
+    box-shadow: 0 0 0 0.2rem rgba(76,91,155,0.2);
+}
+
+
+/* Buttons */
+.btn-primary { 
+    background: linear-gradient(135deg, #6d7cff, #7aa2ff); 
+    border:none; 
+    box-shadow: 0 8px 30px rgba(109,124,255,0.35); 
+    transition: all 0.2s ease;
+}
+.btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 32px rgba(109,124,255,0.5);
+}
+.btn-outline { 
+    background: transparent; 
+    border: 1px solid rgba(255,255,255,0.25); 
+    color: white; 
+}
+
+/* Alerts */
+.alert-danger {
+    background-color: #5c2020;
+    color: #f8d7da;
+    border-color: #8b3a3a;
+}
+.alert-success {
+    background-color: #214d2a;
+    color: #d4edda;
+    border-color: #3f704f;
+}
