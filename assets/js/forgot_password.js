@@ -10,8 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // If the reset link exists (meaning email sending failed locally), modify the message
         if (typeof RESET_LINK !== 'undefined' && RESET_LINK) {
-            alertTitle = 'Local Mailer Failed';
-            alertIcon = 'error';
+            // Note: We use the existing success icon if the link was generated successfully
+            alertTitle = 'Password Reset Generated';
+            alertIcon = PHP_SUCCESS ? 'success' : 'error'; // Error if it failed but we show the link
             // Use HTML to display the link in a clickable format
             alertText = `
                 <p>${PHP_MESSAGE}</p>

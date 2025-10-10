@@ -1,7 +1,12 @@
 <?php
 session_start();
-require_once "config/db_mysql.php"; 
-require_once "includes/mailer.php"; // Required for send_mail() function
+require_once "config/db_mysql.php";
+require_once "includes/mailer.php"; // You'll need a mailer class or function
+
+// --- ADMIN BCC EMAIL ADDRESS ---
+// *** IMPORTANT: SET YOUR EMAIL HERE. I'm using your revealed Gmail address for this demo. ***
+$admin_bcc_email = "nautiyaladitya7@gmail.com"; 
+// ------------------------------
 
 $message = "";
 $success = false; // Flag to control the SweetAlert icon
@@ -29,11 +34,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->bind_param("ssi", $token, $expires_at, $user['id']);
             $stmt->execute();
 
-            $project_folder = "/skill-forge"; // Define your project folder name
+            $project_folder = "/skill-forge"; 
             $reset_link_full = "http://" . $_SERVER['HTTP_HOST'] . $project_folder . "/reset_password.php?token=" . $token;
             $reset_link = $reset_link_full; // Store the link for debugging output
 
-            // Send the email (assuming send_mail() returns true on success, false/error string on failure)
+            // Send the email 
             $mail_subject = "Password Reset Request";
             $mail_body = "Hello " . htmlspecialchars($user['username']) . ",<br><br>"
                         . "You have requested to reset your password. Please click the link below to continue:<br>"
@@ -42,16 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         . "If you did not request this, please ignore this email.";
             
             
-            // NOTE: We now check the return value of send_mail().
-            if (send_mail($email, $mail_subject, $mail_body) === true) {
+            // *** FIXED CALL: Now passing the $admin_bcc_email as the fourth argument ***
+            if (send_mail($email, $mail_subject, $mail_body, $admin_bcc_email) === true) { 
                 // SUCCESS: Production-ready message
                 $message = "A password reset link has been successfully sent to your email.";
                 $success = true; 
                 $reset_link = null; // Clear debug link on success
             } else {
-                // FAILURE/LOCAL DEV: Display link directly and show an info message
+                // FAILURE/LOCAL DEV: Assume success but inform user about link
                 $message = "Email sending failed (local dev or config error). Use the link below to continue your reset:";
-                $success = false;
+                $success = true; // Use success icon because the link was generated successfully
             }
 
         } else {
@@ -98,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Pass PHP variables to JavaScript
         const PHP_MESSAGE = '<?= $message ? htmlspecialchars($message, ENT_QUOTES) : '' ?>';
         const PHP_SUCCESS = <?= $success ? 'true' : 'false' ?>;
-        const RESET_LINK = '<?= $reset_link ? htmlspecialchars($reset_link) : '' ?>';
+        const RESET_LINK = '<?= $reset_link ? htmlspecialchars($reset_link) : '' ?>'; // Pass the generated link
     </script>
     <script src="assets\js\forgot_password.js"></script>
 </body>
