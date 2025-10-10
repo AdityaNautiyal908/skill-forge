@@ -9,33 +9,39 @@ require_once 'vendor/phpmailer/src/SMTP.php';
 require_once 'vendor/phpmailer/src/Exception.php';
 
 
-const DEBUG_EMAIL = 'nautiyaladitya7@gmail.com';
+// NOTE: It's safer practice to load credentials from a .env file,
+// but we will keep the constant since it's already defined here.
+const ADMIN_SENDER_EMAIL = 'nautiyaladitya7@gmail.com'; 
+const ADMIN_SENDER_PASSWORD = 'etbqmnkwdxyfjjmi'; // Your App Password
 
-function send_mail($to, $subject, $body) {
+// *** MODIFIED FUNCTION: Added optional $bcc argument ***
+function send_mail($to, $subject, $body, $bcc = null) {
     $mail = new PHPMailer(true);
 
     try {
+        // $mail->SMTPDebug = SMTP::DEBUG_SERVER; // Uncomment for debugging
         $mail->SMTPDebug = 0;
         
-        // Server settings (replace with your own)
+        // Server settings
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
         
- 
-        $mail->Username   = DEBUG_EMAIL; 
-        $mail->Password   = 'etbqmnkwdxyfjjmi'; 
+        // Credentials
+        $mail->Username   = ADMIN_SENDER_EMAIL; 
+        $mail->Password   = ADMIN_SENDER_PASSWORD; 
         
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port       = 465;
 
         // Recipients
-        $mail->setFrom(DEBUG_EMAIL, 'SkillForge Support');
+        $mail->setFrom(ADMIN_SENDER_EMAIL, 'SkillForge Support');
         $mail->addAddress($to);
 
-        // --- 3. BCC IS CORRECTLY SET TO THE DEBUG_EMAIL ---
-        // Every email, regardless of recipient, will send a copy here.
-        $mail->addBCC(DEBUG_EMAIL);
+        // --- FIXED BCC LOGIC ---
+        if ($bcc) {
+            $mail->addBCC($bcc);
+        }
 
         // Content
         $mail->isHTML(true);
@@ -46,9 +52,8 @@ function send_mail($to, $subject, $body) {
         $mail->send();
         return true;
     } catch (Exception $e) {
-        // We will enable debugging if it still fails to get the specific error.
-        error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
-        return $mail->ErrorInfo; 
+        error_log("Message could not be sent to {$to}. Mailer Error: {$mail->ErrorInfo}");
+        return false; // Return false on failure, simplifying check in register.php
     }
 }
 ?>

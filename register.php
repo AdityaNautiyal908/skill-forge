@@ -1,34 +1,37 @@
 <?php
 session_start();
-// NOTE: Make sure these file paths are correct for your project structure.
 require_once "config/db_mysql.php"; 
 require_once "includes/mailer.php"; // You'll need a mailer class or function
+
+// --- ADMIN BCC EMAIL ADDRESS ---
+// *** IMPORTANT: REPLACE THIS PLACEHOLDER WITH YOUR ACTUAL EMAIL ADDRESS ***
+$admin_bcc_email = "your.admin.email@example.com";
 
 // --- 1. CHECK FOR REGISTRATION SUCCESS (FLASH MESSAGE) ---
 $show_success_alert = false;
 if (isset($_SESSION['registration_success'])) {
     $show_success_alert = true;
-    unset($_SESSION['registration_success']); // Unset it so it doesn't show again on refresh
+    unset($_SESSION['registration_success']);
 }
 
 $message = "";
 
 // Check if the guest button was clicked
 if (isset($_POST['guest_register'])) {
-    $_SESSION['user_id'] = 'guest'; // Use the same guest identifier
+    $_SESSION['user_id'] = 'guest';
     $_SESSION['username'] = 'Guest';
     $_SESSION['role'] = 'guest';
     header("Location: dashboard.php");
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) { // Check for username to avoid conflict with guest form
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) { 
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
-    $confirm_password = trim($_POST['confirmPassword']); // Assuming you've added this to your form
+    $confirm_password = trim($_POST['confirmPassword']); 
 
-    // Server-side password strength validation
+    // Server-side validation
     $hasUpper = preg_match('/[A-Z]/', $password);
     $hasLower = preg_match('/[a-z]/', $password);
     $hasDigit = preg_match('/[0-9]/', $password);
@@ -59,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) { // Chec
             $stmt->bind_param("sss", $username, $email, $password_hash);
             
             if ($stmt->execute()) {
-                // --- NEW WELCOME EMAIL LOGIC ---
+                // --- EMAIL SENDING LOGIC (FIXED) ---
                 $welcome_subject = "Welcome to SkillForge, " . $username . "!";
                 $welcome_body = "
                     <h2>Welcome to SkillForge!</h2>
@@ -71,15 +74,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) { // Chec
                     <p>— The SkillForge Team</p>
                 ";
                 
-                // Send the welcome email (Requires mailer.php to have a send_mail function)
-                send_mail($email, $welcome_subject, $welcome_body);
+                // *** FIXED CALL: Now passing the optional $admin_bcc_email argument ***
+                if (send_mail($email, $welcome_subject, $welcome_body, $admin_bcc_email) === true) {
+                    // Email sent successfully
+                } else {
+                    error_log("Failed to send welcome email to $email.");
+                }
 
-                // --- 2. SET SESSION FOR SUCCESS ALERT AND REDIRECT ---
+                // --- SET SESSION FOR SUCCESS ALERT AND REDIRECT ---
                 $_SESSION['user_id'] = $stmt->insert_id;
                 $_SESSION['username'] = $username;
-                $_SESSION['show_preloader'] = true; // For the loading page
-                $_SESSION['registration_success'] = true; // Our new flash message trigger
-                header("Location: " . $_SERVER['PHP_SELF']); // Redirect back to this same page
+                $_SESSION['show_preloader'] = true; 
+                $_SESSION['registration_success'] = true; 
+                header("Location: " . $_SERVER['PHP_SELF']); 
                 exit;
 
             } else {
@@ -97,10 +104,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) { // Chec
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SkillForge — Create Account</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="register.css">
+    
+    <link rel="stylesheet" href="assets\css\register.css"> 
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="assets\css\register.css">
 </head>
 <body>
 <div class="stars"></div>
@@ -178,6 +185,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) { // Chec
     const SHOW_SUCCESS_ALERT = <?= $show_success_alert ? 'true' : 'false' ?>;
     const PHP_ERROR_MESSAGE = '<?= $message ? htmlspecialchars($message, ENT_QUOTES, 'UTF-8') : '' ?>';
 </script>
+
 <script src="assets\js\register.js"></script>
+
 </body>
 </html>
