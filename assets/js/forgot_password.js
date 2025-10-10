@@ -1,16 +1,34 @@
-// --- SweetAlert for Server Messages ---
+// --- SweetAlert for Server Messages and Local Debugging ---
 document.addEventListener('DOMContentLoaded', () => {
-    // PHP_MESSAGE and PHP_SUCCESS are passed as global constants in forgot_password.php
+    // PHP_MESSAGE, PHP_SUCCESS, and RESET_LINK are passed as global constants in forgot_password.php
     
     if (typeof PHP_MESSAGE !== 'undefined' && PHP_MESSAGE) {
+        
+        let alertTitle = PHP_SUCCESS ? 'Success!' : 'Request Status';
+        let alertIcon = PHP_SUCCESS ? 'success' : 'info';
+        let alertText = PHP_MESSAGE;
+        
+        // If the reset link exists (meaning email sending failed locally), modify the message
+        if (typeof RESET_LINK !== 'undefined' && RESET_LINK) {
+            alertTitle = 'Local Mailer Failed';
+            alertIcon = 'error';
+            // Use HTML to display the link in a clickable format
+            alertText = `
+                <p>${PHP_MESSAGE}</p>
+                <p>Click the link below to manually proceed with the password reset:</p>
+                <a href="${RESET_LINK}" target="_blank" style="word-break: break-all; color: #ffd700; text-decoration: underline;">
+                    ${RESET_LINK}
+                </a>
+            `;
+        }
+
         Swal.fire({
-            // Ternary operator to choose icon: 'success' if $success is true, 'info' otherwise
-            icon: PHP_SUCCESS ? 'success' : 'info', 
-            title: 'Request Status',
-            text: PHP_MESSAGE,
+            icon: alertIcon, 
+            title: alertTitle,
+            html: alertText, // Use html property to render the link
             background: '#3c467b',
             color: '#fff',
-            confirmButtonColor: '#6d7cff'
+            confirmButtonColor: '#6d7cff',
         });
     }
 });

@@ -1,10 +1,11 @@
 <?php
 session_start();
-require_once "config/db_mysql.php";
+require_once "config/db_mysql.php"; 
 require_once "includes/mailer.php"; // Required for send_mail() function
 
 $message = "";
 $success = false; // Flag to control the SweetAlert icon
+$reset_link = null; // Variable to store the generated link for local debugging
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = trim($_POST['email']);
@@ -28,26 +29,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->bind_param("ssi", $token, $expires_at, $user['id']);
             $stmt->execute();
 
-            $project_folder = "/skill-forge"; // Define your project folder name (adjust if your project root is different)
-            $reset_link = "http://" . $_SERVER['HTTP_HOST'] . $project_folder . "/reset_password.php?token=" . $token;
+            $project_folder = "/skill-forge"; // Define your project folder name
+            $reset_link_full = "http://" . $_SERVER['HTTP_HOST'] . $project_folder . "/reset_password.php?token=" . $token;
+            $reset_link = $reset_link_full; // Store the link for debugging output
 
             // Send the email (assuming send_mail() returns true on success, false/error string on failure)
             $mail_subject = "Password Reset Request";
             $mail_body = "Hello " . htmlspecialchars($user['username']) . ",<br><br>"
                         . "You have requested to reset your password. Please click the link below to continue:<br>"
-                        . "<a href='" . htmlspecialchars($reset_link) . "'>Reset Your Password</a><br><br>"
+                        . "<a href='" . htmlspecialchars($reset_link_full) . "'>Reset Your Password</a><br><br>"
                         . "This link is valid for 6 hours.<br>"
                         . "If you did not request this, please ignore this email.";
             
             
             // NOTE: We now check the return value of send_mail().
             if (send_mail($email, $mail_subject, $mail_body) === true) {
-                // CHANGED: Direct success message and set flag for SweetAlert
+                // SUCCESS: Production-ready message
                 $message = "A password reset link has been successfully sent to your email.";
                 $success = true; 
+                $reset_link = null; // Clear debug link on success
             } else {
-                // FAILURE: Show the generic message (log error in mailer.php)
-                $message = "If an account with that email exists, a password reset link has been sent.";
+                // FAILURE/LOCAL DEV: Display link directly and show an info message
+                $message = "Email sending failed (local dev or config error). Use the link below to continue your reset:";
                 $success = false;
             }
 
@@ -67,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SkillForge — Forgot Password</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets\css\forgot_password.css">
+    <link rel="stylesheet" href="assets\css\forgot_password.css"> 
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -95,6 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Pass PHP variables to JavaScript
         const PHP_MESSAGE = '<?= $message ? htmlspecialchars($message, ENT_QUOTES) : '' ?>';
         const PHP_SUCCESS = <?= $success ? 'true' : 'false' ?>;
+        const RESET_LINK = '<?= $reset_link ? htmlspecialchars($reset_link) : '' ?>';
     </script>
     <script src="assets\js\forgot_password.js"></script>
 </body>
