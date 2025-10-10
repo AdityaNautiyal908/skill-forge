@@ -89,16 +89,9 @@ function rankBadge($rank) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SkillForge — Leaderboard</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="assets\css\leaderboard.css">
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
-<style>
-body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200px 600px at 10% 10%, rgba(76,91,155,0.35), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(60,70,123,0.35), transparent 60%), linear-gradient(135deg, #171b30, #20254a 55%, #3c467b); }
-.light { color:#2d3748 !important; background: radial-gradient(1200px 600px at 10% 10%, rgba(0,0,0,0.08), transparent 60%), radial-gradient(1000px 600px at 90% 30%, rgba(0,0,0,0.06), transparent 60%), linear-gradient(135deg, #e2e8f0, #cbd5e0 60%, #a0aec0) !important; }
-.table { color:#fff; }
-.table td, .table th { border-color: rgba(255,255,255,0.18) !important; }
-.panel { background: linear-gradient(180deg, rgba(60,70,123,0.42), rgba(60,70,123,0.18)); border:1px solid rgba(255,255,255,0.14); border-radius:16px; }
-.badge { font-size: .85rem; }
-.medal { font-size: 22px; }
-</style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(0,0,0,0.35); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.08);">
@@ -174,7 +167,7 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
             $count=(int)($row->count ?? 0); 
             $lastTs = ($row->lastSolved instanceof MongoDB\BSON\UTCDateTime) ? $row->lastSolved->toDateTime()->format('Y-m-d H:i:s') : ''; 
           ?>
-            <tr>
+            <tr class="<?= ($uid === (int)$_SESSION['user_id']) ? 'table-info' : '' ?>">
               <td><?= rankBadge($rank) ?></td>
               <td class="fw-semibold">
                 <?= htmlspecialchars($name) ?>
@@ -184,16 +177,17 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
                 <div class="small text-muted">ID: <?= $uid ?></div>
                 
                 <?php 
-                // *** UPDATED CONDITION: Show button if the viewer is an Admin, regardless of user status ***
+                // *** ADMIN CLEAN UP BUTTON ***
                 $showCleanUpButton = $isAdmin;
                 
                 if ($showCleanUpButton): 
                 ?>
                   <a href="#" 
-                     data-delete-href="admin_delete_user_submissions.php?user_id=<?= $uid ?>&return_to=<?= urlencode($_SERVER['REQUEST_URI']) ?>"
-                     data-user-id="<?= $uid ?>"
-                     class="btn btn-sm btn-danger mt-1 clean-up-btn">
-                    <small>Delete</small>
+                      data-delete-href="admin_delete_user_submissions.php?user_id=<?= $uid ?>&return_to=<?= urlencode($_SERVER['REQUEST_URI']) ?>"
+                      data-user-id="<?= $uid ?>"
+                      data-username="<?= htmlspecialchars($name) ?>"
+                      class="btn btn-sm btn-danger mt-1 clean-up-btn">
+                    <small>Delete Submissions</small>
                   </a>
                 <?php endif; ?>
               </td>
@@ -210,69 +204,6 @@ body { margin:0; color:white; min-height:100vh; background: radial-gradient(1200
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-(function(){
-  function apply(){ var theme=localStorage.getItem('sf_theme')||'dark'; var anim=localStorage.getItem('sf_anim')||'on'; document.body.classList.toggle('light', theme==='light'); document.body.classList.toggle('no-anim', anim==='off'); }
-  apply();
-})();
-
-
-// SweetAlert2 confirmation handler for Clean Up button
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if Swal (SweetAlert2) is loaded
-    if (typeof Swal === 'undefined') {
-        console.error('SweetAlert2 is not loaded. Ensure the script tag is present.');
-        return;
-    }
-    
-    const cleanUpButtons = document.querySelectorAll('.clean-up-btn');
-
-    cleanUpButtons.forEach(button => {
-        button.addEventListener('click', function(event) {
-            event.preventDefault(); // Stop the default link action
-
-            const deleteUrl = this.getAttribute('data-delete-href');
-            const userId = this.getAttribute('data-user-id');
-            
-            // *** CORRECTED LOGIC: Find the entire <td>, then find the user's name element within it ***
-            const userCell = this.closest('td');
-            const nameElement = userCell.querySelector('.fw-semibold');
-            
-            let userName = 'Unknown User'; // Default name
-
-            if (nameElement) {
-                // Get the text content, strip the rank number (#4, #5) and the ID line.
-                // This extracts only the visible username (Aditya, Luffy, User #0)
-                let fullText = nameElement.firstChild ? nameElement.firstChild.nodeValue.trim() : nameElement.textContent.trim();
-                userName = fullText.split('\n')[0].trim(); // Get the first line (the name itself)
-            }
-            // *** END CORRECTED LOGIC ***
-
-            Swal.fire({
-                title: 'Are you sure?',
-                text: `WARNING: You are about to delete ALL submissions for user "${userName}" (ID #${userId}). This action is irreversible!`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel',
-                
-                // Custom styling to match your dark theme
-                confirmButtonColor: '#dc3545', // Red for delete
-                cancelButtonColor: '#6c757d', // Secondary/Grey
-                background: '#20254a', 
-                color: '#fff', 
-                customClass: {
-                    container: 'leaderboard-swal-container' 
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // If confirmed, redirect to the PHP cleanup script
-                    window.location.href = deleteUrl;
-                }
-            });
-        });
-    });
-});
-</script>
+<script src="assets\js\leaderboard.js"></script>
 </body>
 </html>

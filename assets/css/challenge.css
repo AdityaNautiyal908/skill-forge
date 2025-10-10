@@ -1,0 +1,108 @@
+/* Reusing your dark theme styles for consistency */
+body { 
+    background: linear-gradient(135deg, #171b30, #20254a 55%, #3c467b);
+    color: white; 
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px; /* Reduced top padding to make room for the link */
+}
+/* Style for the back link container */
+.back-link-container {
+    width: 90%;
+    max-width: 900px;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+/* --- NEW ANIMATED BACK LINK STYLES --- */
+.back-link {
+    color: #7aa2ff; /* Light blue color from your primary button gradient */
+    text-decoration: none; /* REMOVED UNDERLINE */
+    font-size: 1.1em;
+    display: inline-block;
+    transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
+}
+.back-link:hover {
+    color: #fff; /* White text on hover */
+    text-shadow: 0 0 8px rgba(122, 162, 255, 0.8); /* Subtle glow effect */
+    transform: translateX(-2px); /* Slight shift to the left */
+}
+/* --- END NEW BACK LINK STYLES --- */
+
+
+.container { 
+    background: rgba(60,70,123,0.25);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 900px;
+}
+.question-box {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    min-height: 250px;
+    
+    /* --- Centering the Content using Flexbox --- */
+    display: flex; 
+    flex-direction: column;
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally for loading messages */
+    text-align: center; /* Ensures text itself is centered */
+}
+.option-btn {
+    width: 100%;
+    margin-bottom: 10px;
+    text-align: left;
+    padding: 12px;
+    border: 1px solid rgba(109,124,255,0.4);
+    transition: background-color 0.2s;
+    color: white;
+    background-color: rgba(109,124,255,0.2);
+}
+.option-btn:hover {
+    background-color: rgba(109,124,255,0.4);
+    color: white;
+}
+.score-board {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+.winner-screen {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 50px;
+    border-radius: 15px;
+    text-align: center;
+}
+.winner-screen h1 {
+    color: #5efc8d;
+}
+/* Style for the Lottie component */
+dotlottie-wc {
+    display: block; /* Ensures centering works */
+    margin: 20px auto;
+}
+
+/* New rule to override horizontal centering when options are displayed */
+.question-box:not(.initial-load) {
+    align-items: stretch; /* Stretch content back to full width for questions/options */
+    text-align: left; /* Text alignment back to default left */
+}
+
+/* Style for the name input fields to fit the dark theme */
+.name-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(109,124,255,0.4);
+    color: white;
+    transition: border-color 0.2s;
+}
+.name-input:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: #6d7cff;
+    color: white;
+    box-shadow: 0 0 0 0.25rem rgba(109, 124, 255, 0.25);
+}
