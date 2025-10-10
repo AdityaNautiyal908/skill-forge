@@ -96,10 +96,10 @@ $prompt_register = isset($_GET['prompt_register']) && $_GET['prompt_register'] =
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SkillForge — Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="login.css">
+    
+    <link rel="stylesheet" href="assets\css\login.css">
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="assets\css\login.css">
 </head>
 <body>
     <div class="stars"></div>
@@ -108,6 +108,9 @@ $prompt_register = isset($_GET['prompt_register']) && $_GET['prompt_register'] =
     <div class="orb o2"></div>
 
     <div class="auth-card mx-3">
+        <div id="controls-container" class="mb-3 d-flex justify-content-end gap-2">
+            </div>
+
         <span class="brand">SkillForge</span>
         <h2 class="title" align="center">Welcome</h2>
         <p class="subtitle">Log in to continue your learning journey.</p>
@@ -138,10 +141,11 @@ $prompt_register = isset($_GET['prompt_register']) && $_GET['prompt_register'] =
     </div>
 
     <script>
+        // Pass PHP variables to JavaScript
         const PHP_MESSAGE = '<?= $message ? htmlspecialchars($message, ENT_QUOTES) : '' ?>';
         const PROMPT_REGISTER = <?= $prompt_register ? 'true' : 'false' ?>;
     </script>
     
-    <script src="assets\js\script.js"></script>
+    <script src="assets\js\login.js"></script>
 </body>
 </html>

@@ -1,6 +1,9 @@
+// --- SweetAlert2 logic ---
+
 // Function to handle SweetAlert2 for server-side messages (from PHP_MESSAGE)
 function handleServerMessages() {
-    if (PHP_MESSAGE) {
+    // PHP_MESSAGE and PROMPT_REGISTER are passed as global constants in login.php
+    if (typeof PHP_MESSAGE !== 'undefined' && PHP_MESSAGE) {
         Swal.fire({
             icon: 'error',
             title: 'Login Failed',
@@ -11,7 +14,7 @@ function handleServerMessages() {
         });
     }
 
-    if (PROMPT_REGISTER) {
+    if (typeof PROMPT_REGISTER !== 'undefined' && PROMPT_REGISTER) {
         Swal.fire({
             icon: 'info',
             title: 'Start Your Journey',
@@ -22,10 +25,12 @@ function handleServerMessages() {
         });
     }
 }
-handleServerMessages();
+// Run on document load
+document.addEventListener('DOMContentLoaded', handleServerMessages);
+
 
 // Client-side validation with SweetAlert2
-document.getElementById('loginForm').addEventListener('submit', function(event) {
+document.getElementById('loginForm') && document.getElementById('loginForm').addEventListener('submit', function(event) {
     const emailField = document.getElementById('email');
     const passwordField = document.getElementById('password');
 
@@ -42,7 +47,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     }
 });
 
-// Electric web canvas animation
+// --- Electric web canvas animation (unchanged) ---
 (function(){
     var canvas = document.getElementById('webLogin'); 
     if (!canvas) return; 
@@ -97,11 +102,11 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
         } 
         requestAnimationFrame(loop);
     } 
-    loop();
+    document.addEventListener('DOMContentLoaded', loop);
 })();
 
 
-// Toggles for theme and animation
+// --- Toggles for theme and animation (Fix: Appending to controls-container) ---
 (function(){
     function apply(){ 
         var theme=localStorage.getItem('sf_theme')||'dark'; 
@@ -111,20 +116,17 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     }
     apply();
     
-    var box=document.createElement('div'); 
-    box.style.position='fixed'; box.style.right='14px'; box.style.bottom='14px'; 
-    box.style.zIndex='9999'; box.style.display='flex'; box.style.gap='8px';
+    // Target the new container in the HTML
+    var container = document.getElementById('controls-container');
+    if (!container) return;
     
     function mk(label){ 
         var b=document.createElement('button'); 
         b.textContent=label; 
-        // Using inline styles for the controls as they were in the original file
-        b.style.border='1px solid rgba(255,255,255,0.4)'; b.style.background='rgba(0,0,0,0.35)'; 
-        b.style.color='#fff'; b.style.padding='8px 12px'; b.style.borderRadius='10px'; 
-        b.style.backdropFilter='blur(6px)'; 
         return b; 
     }
     
+    // Create buttons with dynamic labels
     var tBtn=mk((localStorage.getItem('sf_theme')||'dark')==='light'?'Dark Mode':'Light Mode');
     var aBtn=mk((localStorage.getItem('sf_anim')||'on')==='off'?'Enable Anim':'Disable Anim');
     
@@ -144,5 +146,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
         apply(); 
     };
     
-    document.body.appendChild(box); box.appendChild(tBtn); box.appendChild(aBtn);
+    // Append to the container inside the auth-card
+    container.appendChild(tBtn); 
+    container.appendChild(aBtn);
 })();
