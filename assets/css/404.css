@@ -1,0 +1,61 @@
+body {
+    /* Matches the deep blue background gradient from your dashboard */
+    background: linear-gradient(135deg, #171b30, #20254a 55%, #3c467b);
+    color: white; 
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+.error-container {
+    background: rgba(60, 70, 123, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 30px 50px; 
+    max-width: 600px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+}
+.error-code {
+    font-size: 8rem;
+    font-weight: 800;
+    color: #6d7cff; /* Primary color highlight */
+    text-shadow: 0 0 15px rgba(109, 124, 255, 0.5);
+    margin-bottom: 0;
+    line-height: 1;
+}
+.error-text {
+    font-size: 1.8rem;
+    margin-bottom: 20px; 
+    color: #7aa2ff;
+}
+.btn-primary {
+    /* Matches your primary button style */
+    background: linear-gradient(135deg, #6d7cff, #7aa2ff);
+    border: none;
+    box-shadow: 0 4px 15px rgba(109,124,255,0.4);
+    font-weight: 600;
+    transition: transform 0.2s;
+}
+.btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+.nav-links a {
+    color: #ccc;
+    margin: 0 10px;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.nav-links a:hover {
+    color: #fff;
+}
+/* Style for the Lottie component */
+dotlottie-wc {
+    display: block;
+    margin: 15px auto 25px auto; 
+    width: 250px; /* Kept the size consistent for a good fit */
+    height: 250px;
+}
