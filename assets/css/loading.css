@@ -14,8 +14,10 @@ h1 {
     margin-top: 20px;
     color: #7aa2ff;
 }
+
 /* Style for the Lottie component */
 dotlottie-wc {
     display: block;
     margin: 0 auto;
 }
+

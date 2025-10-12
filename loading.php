@@ -36,7 +36,7 @@ $redirect_delay_ms = 2500; // Display animation for 2.5 seconds
         ></dotlottie-wc>
 
         <h1>Loading your personalized dashboard...</h1>
-        <p class="text-muted">Preparing your coding environment.</p>
+        <p>Preparing your coding environment.</p>
     </div>
     
     <script>
