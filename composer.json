@@ -1,6 +1,7 @@
 {
     "require": {
         "hybridauth/hybridauth": "^3.12",
-        "vlucas/phpdotenv": "^5.6"
+        "vlucas/phpdotenv": "^5.6",
+        "phpoffice/phpword": "^1.0"
     }
 }

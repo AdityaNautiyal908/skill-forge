@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL); ini_set('display_errors', 1);
 // Ensure MongoDB PHP extension is available
 if (!extension_loaded('mongodb')) {
     die('MongoDB PHP extension not enabled. Enable php_mongodb in php.ini and restart Apache.');

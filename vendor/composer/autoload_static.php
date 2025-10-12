@@ -22,6 +22,8 @@ class ComposerStaticInit66501ca8fa27c2f60c8a58c36c7c5686
         'P' => 
         array (
             'PhpOption\\' => 10,
+            'PhpOffice\\PhpWord\\' => 18,
+            'PhpOffice\\Math\\' => 15,
         ),
         'H' => 
         array (
@@ -53,6 +55,14 @@ class ComposerStaticInit66501ca8fa27c2f60c8a58c36c7c5686
         'PhpOption\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption',
+        ),
+        'PhpOffice\\PhpWord\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpoffice/phpword/src/PhpWord',
+        ),
+        'PhpOffice\\Math\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpoffice/math/src/Math',
         ),
         'Hybridauth\\' => 
         array (

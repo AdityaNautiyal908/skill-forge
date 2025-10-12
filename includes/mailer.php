@@ -4,9 +4,9 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-require_once 'vendor/phpmailer/src/PHPMailer.php';
-require_once 'vendor/phpmailer/src/SMTP.php';
-require_once 'vendor/phpmailer/src/Exception.php';
+require_once '../vendor/phpmailer/src/PHPMailer.php';
+require_once '../vendor/phpmailer/src/SMTP.php';
+require_once '../vendor/phpmailer/src/Exception.php';
 
 
 const ADMIN_SENDER_EMAIL = 'nautiyaladitya7@gmail.com'; 
