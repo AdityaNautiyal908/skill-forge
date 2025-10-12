@@ -5,4 +5,4 @@ RewriteBase /skill-forge/
 RewriteRule ^social_login.php$ public/social_login.php [L]
 
 # Custom 404 Error Page
-ErrorDocument 404 /skill-forge/404.php
+ErrorDocument 404 /skill-forge/core/404.php

@@ -11,6 +11,10 @@ An interactive coding practice platform with code problems and MCQs. Users regis
 - Persistent user preferences (theme/animations)
 - Delightful UI with 3D tilt and cursor spotlight effects
 
+## Error Handling
+- **Custom 404 Page:** When a user navigates to a non-existent page, a custom 404 error page is displayed.
+- **Dashboard Redirect:** The 404 page includes a "Return to Dashboard" button to easily navigate back to the main application.
+
 ## Tech Stack
 - PHP 8+, Apache (XAMPP)
 - MySQL 8+ (users/auth)
@@ -20,20 +24,66 @@ An interactive coding practice platform with code problems and MCQs. Users regis
 
 ## Project Structure
 ```
-config/
-  db_mysql.php       # MySQL connection
-  db_mongo.php       # MongoDB helper
-index.php            # Landing (redirects logged-in users to dashboard)
-login.php            # Login
-register.php         # Registration
-logout.php           # Logout
-profile.php          # Profile, password change, preferences
-dashboard.php        # Language tiles + entry points
-problems.php         # Code problem player + submissions
-mcq.php              # MCQ player + submissions
-submissions.php      # Admin review (requires role=admin)
-leaderboard.php      # Leaderboard (aggregate from submissions)
-mysql.sql            # MySQL schema seed (see note below)
+skill-forge/
+├── admin/
+│   ├── admin_delete_submission.php
+│   ├── admin_delete_user_submissions.php
+│   ├── admin_edit_comment.php
+│   ├── admin_feedback.php
+│   ├── admin_mail.php
+│   ├── export_submissions.php
+│   └── users_admin.php
+├── api/
+│   ├── check_notifications_simple.php
+│   └── check_notifications.php
+├── config/
+│   ├── db_mongo.php
+│   └── db_mysql.php
+├── core/
+│   ├── 404.php
+│   ├── comment.php
+│   ├── debug_comments.php
+│   ├── forgot_password.php
+│   ├── leaderboard.php
+│   ├── logout.php
+│   ├── notifications.php
+│   ├── reset_password.php
+│   └── submit_code.php
+├── data/
+│   ├── qa_notifications.json
+│   └── user_*_seen.txt
+├── db/
+│   └── mysql.sql
+├── docs/
+│   └── README.md
+├── includes/
+│   └── mailer.php
+├── public/
+│   ├── assets/
+│   │   ├── css/
+│   │   └── js/
+│   ├── challenge.php
+│   ├── chat.php
+│   ├── check_notifications.php
+│   ├── clear_notifications_simple.php
+│   ├── dashboard.php
+│   ├── fetch_chat.php
+│   ├── index.php
+│   ├── loading.php
+│   ├── login.php
+│   ├── mcq.php
+│   ├── post_chat.php
+│   ├── problems.php
+│   ├── profile.php
+│   ├── register.php
+│   ├── social_login.php
+│   ├── submissions.php
+│   └── update_last_seen.php
+├── vendor/
+├── .gitignore
+├── .htaccess
+├── composer.json
+└── composer.lock
 ```
 
 ## Requirements
@@ -44,7 +94,7 @@ mysql.sql            # MySQL schema seed (see note below)
 
 ## Quick Start
 1. Clone/copy the project into your XAMPP htdocs directory:
-   - `C:\\xampp\\htdocs\\skill-forge`
+   - `C:\xampp\htdocs\skill-forge`
 2. Start Apache and MySQL in XAMPP Control Panel.
 3. Create the MySQL schema:
    - Import `mysql.sql` into MySQL (phpMyAdmin or CLI).
@@ -98,5 +148,3 @@ Admins can open `submissions.php` to review all submissions.
 
 ## License
 This project is provided as-is. Add your preferred license if you plan to distribute.
-
-
