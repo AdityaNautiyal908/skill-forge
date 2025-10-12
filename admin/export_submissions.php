@@ -149,7 +149,7 @@ if (empty($submissions)) {
     // Add submissions
     foreach ($submissions as $sub) {
         $section->addTextBreak(1);
-        $section->addText('Submission ID: ' . (string)$sub->_id);
+        // $section->addText('Submission ID: ' . (string)$sub->_id);
         $section->addText('User: ' . ($usernames[(int)$sub->user_id] ?? 'Unknown User') . ' (ID: ' . $sub->user_id . ')');
 
         // ------------------------
@@ -189,7 +189,7 @@ if (empty($submissions)) {
 }
 
 // Save Word document
-$filename = 'skillforge_submissions_' . date('Ymd_His') . '.docx';
+$filename = 'skillforge_submissions_'. '.docx';
 header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 header('Content-Disposition: attachment;filename="' . $filename . '"');
 header('Cache-Control: max-age=0');
